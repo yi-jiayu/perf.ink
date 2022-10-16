@@ -2,15 +2,12 @@ import base64
 import hashlib
 import secrets
 import urllib.parse
-from dataclasses import dataclass
-from datetime import datetime, timedelta
 from enum import Enum
 from typing import Literal, Optional, TypedDict
 
 import httpx
 import structlog
 import typer
-from pydantic import BaseModel, Field
 
 logger = structlog.get_logger()
 
@@ -262,6 +259,15 @@ def get_salmon_run_jobs(client: httpx.Client, bullet_token: str):
     return _graphql(client, bullet_token, SplatnetQuery.COOP_RESULT)
 
 
+def get_salmon_run_job_detail(client: httpx.Client, bullet_token: str, shift_id: str):
+    return _graphql(
+        client,
+        bullet_token,
+        SplatnetQuery.COOP_HISTORY_DETAIL,
+        {"coopHistoryDetailId": shift_id},
+    )
+
+
 def get_splatnet_session(
     client: httpx.Client, nintendo_session_token: str
 ) -> tuple[str, str]:
@@ -302,7 +308,7 @@ def main(
             client, nintendo_token["access_token"], user
         )
         logger.info("got nso access token", value=nso_access_token)
-        web_service_token, expires_at = _get_web_service_token(client, nso_access_token)
+        web_service_token = _get_web_service_token(client, nso_access_token)
         logger.info("got web service token", value=web_service_token)
         bullet_token = _get_bullet_token(client, web_service_token, user)
         logger.info("got bullet token", value=bullet_token)

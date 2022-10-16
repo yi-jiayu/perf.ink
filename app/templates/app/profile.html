@@ -35,9 +35,11 @@
     </div>
     <div>
         {% for shift in shifts %}
-            <div>
-                {{ shift.rank }} {{ shift.points }} {{ shift.change }}
-            </div>
+            <a href="{% url 'salmon_run_shift_detail' shift.id %}">
+                <div>
+                    {{ shift.rank }} {{ shift.points }} {{ shift.change }}
+                </div>
+            </a>
         {% endfor %}
     </div>
 </div>

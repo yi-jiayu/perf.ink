@@ -1,13 +1,14 @@
 from typing import Callable, Concatenate, ParamSpec, TypeVar
 
 import httpx
+import structlog
 from django.db import transaction
 
 import splatnet
+
 from . import models
 
-P = ParamSpec("P")
-R = TypeVar("R")
+logger = structlog.get_logger()
 
 
 def get_splatnet_session(user: models.User) -> models.SplatnetSession:
@@ -26,7 +27,7 @@ def renew_splatnet_session(user: models.User) -> models.SplatnetSession:
             client, nintendo_session.token
         )
 
-    splatnet_session, created = models.SplatnetSession.objects.create_or_update(
+    splatnet_session, created = models.SplatnetSession.objects.update_or_create(
         user=user,
         defaults={
             "web_service_token": web_service_token,
@@ -36,8 +37,12 @@ def renew_splatnet_session(user: models.User) -> models.SplatnetSession:
     return splatnet_session
 
 
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
 def with_bullet_token(
-        f: Callable[Concatenate[str, P], R]
+    f: Callable[Concatenate[str, P], R]
 ) -> Callable[Concatenate[models.User, P], R]:
     def wrapper(user: models.User, *args: P.args, **kwargs: P.kwargs) -> R:
         splatnet_session = get_splatnet_session(user)
@@ -68,7 +73,9 @@ def get_salmon_run_shifts(bullet_token: str) -> list[dict]:
     return shifts
 
 
-def sync_salmon_run_shifts(user: models.User) -> list[models.SalmonRunShiftSummaryRaw]:
+def sync_salmon_run_shift_summaries(
+    user: models.User,
+) -> list[models.SalmonRunShiftSummaryRaw]:
     shifts = []
     # reverse shifts to get oldest first
     for shift in reversed(get_salmon_run_shifts(user)):
@@ -81,4 +88,29 @@ def sync_salmon_run_shifts(user: models.User) -> list[models.SalmonRunShiftSumma
         )
         if created:
             shifts.append(shift)
+    logger.info("synced shift summaries", user_id=user.id, count=len(shifts))
     return shifts
+
+
+@with_bullet_token
+def get_salmon_run_shift_detail(bullet_token: str, shift_id: str) -> dict:
+    with httpx.Client() as client:
+        return splatnet.get_salmon_run_job_detail(client, bullet_token, shift_id)
+
+
+@transaction.atomic
+def sync_salmon_run_shift_detail(
+    user: models.User, raw: models.SalmonRunShiftSummaryRaw
+):
+    models.SalmonRunShiftSummaryRaw.objects.select_for_update().get(pk=raw.pk)
+    try:
+        return models.SalmonRunShiftDetailRaw.objects.get(
+            uploaded_by=user, shift_id=raw.shift_id
+        )
+    except models.SalmonRunShiftDetailRaw.DoesNotExist:
+        data = get_salmon_run_shift_detail(user, raw.shift_id)
+        return models.SalmonRunShiftDetailRaw.objects.create(
+            shift_id=raw.shift_id,
+            uploaded_by=user,
+            data=data,
+        )

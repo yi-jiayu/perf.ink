@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
-from . import forms, models, services
+from . import forms, models, services, tasks
 
 
 @login_required
@@ -26,6 +26,7 @@ def profile(request):
         data = shift.data
         shifts.append(
             {
+                "id": data["id"],
                 "rank": data["afterGrade"]["name"],
                 "points": data["afterGradePoint"],
                 "change": data["gradePointDiff"],
@@ -55,5 +56,15 @@ def nintendo_session(request):
 
 @login_required
 def salmon_run_sync(request):
-    services.sync_salmon_run_shifts(request.user)
+    summaries = services.sync_salmon_run_shift_summaries(request.user)
+    if summaries:
+        tasks.sync_salmon_run_shift_details.delay(
+            request.user.id, [summary.id for summary in summaries]
+        )
     return redirect("profile")
+
+
+@login_required
+def salmon_run_shift_detail(request, shift_id: str):
+    detail = get_object_or_404(models.SalmonRunShiftDetailRaw, shift_id=shift_id)
+    return render(request, "app/salmon_run_shift_detail.html", {"detail": detail})
