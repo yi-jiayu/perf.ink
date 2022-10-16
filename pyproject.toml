@@ -14,7 +14,7 @@ structlog = "^22.1.0"
 Django = "^4.1.1"
 psycopg2 = "^2.9.4"
 django-allauth = "^0.51.0"
-pydantic = "^1.10.2"
+pydantic = {extras = ["dotenv"], version = "^1.10.2"}
 celery = {extras = ["redis"], version = "^5.2.7"}
 
 

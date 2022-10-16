@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 
+from .config import config
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -78,7 +80,11 @@ WSGI_APPLICATION = "perf_ink.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "perf_ink",
+        "NAME": config.database_name,
+        'USER': config.database_user,
+        'PASSWORD': config.database_password,
+        'HOST': config.database_host,
+        'PORT': config.database_port,
     }
 }
 
@@ -131,4 +137,4 @@ AUTHENTICATION_BACKENDS = [
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
 
-CELERY_BROKER_URL = "redis://"
+CELERY_BROKER_URL = config.celery_broker_url
