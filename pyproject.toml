@@ -3,8 +3,6 @@ name = "perf_ink"
 version = "0.1.0"
 description = ""
 authors = ["Jiayu Yi <yijiayu@gmail.com>"]
-readme = "README.md"
-packages = [{include = "perf"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -16,6 +14,7 @@ psycopg2 = "^2.9.4"
 django-allauth = "^0.51.0"
 pydantic = {extras = ["dotenv"], version = "^1.10.2"}
 celery = {extras = ["redis"], version = "^5.2.7"}
+gunicorn = "^20.1.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -24,5 +23,5 @@ isort = "^5.10.1"
 mypy = "^0.982"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.2"]
 build-backend = "poetry.core.masonry.api"
