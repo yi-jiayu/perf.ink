@@ -1,0 +1,43 @@
+{% load humanize %}
+
+<div><h1>Welcome, {{ user.username }}!</h1></div>
+
+<div>
+    <h2>Nintendo</h2>
+    <form action="/accounts/nintendo_session/" method="post">
+        {% csrf_token %}
+        {{ nintendo_session_form }}
+        <input type="submit" value="Save">
+    </form>
+</div>
+
+<div>
+    <h2>Splatnet</h2>
+    {% if splatnet_session %}
+        <dl>
+            <dt>Web service token</dt>
+            <dd>{{ splatnet_session.web_service_token }}</dd>
+            <dt>Bullet token</dt>
+            <dd>{{ splatnet_session.bullet_token }}</dd>
+            <dt>Updated at</dt>
+            <dd>{{ splatnet_session.updated_at }} ({{ splatnet_session.updated_at|naturaltime }})</dd>
+        </dl>
+    {% endif %}
+</div>
+
+<div>
+    <h2>Shifts</h2>
+    <div>
+        <form action="/salmon_run/sync/" method="post">
+            {% csrf_token %}
+            <input type="submit" value="Sync">
+        </form>
+    </div>
+    <div>
+        {% for shift in shifts %}
+            <div>
+                {{ shift.rank }} {{ shift.points }} {{ shift.change }}
+            </div>
+        {% endfor %}
+    </div>
+</div>

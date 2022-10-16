@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "perf_ink"
+version = "0.1.0"
+description = ""
+authors = ["Jiayu Yi <yijiayu@gmail.com>"]
+readme = "README.md"
+packages = [{include = "perf"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+httpx = "^0.23.0"
+typer = "^0.6.1"
+structlog = "^22.1.0"
+Django = "^4.1.1"
+psycopg2 = "^2.9.4"
+django-allauth = "^0.51.0"
+pydantic = "^1.10.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.10.0"
+isort = "^5.10.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
