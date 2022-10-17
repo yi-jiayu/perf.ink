@@ -76,20 +76,22 @@ def get_salmon_run_shifts(bullet_token: str) -> list[dict]:
 def sync_salmon_run_shift_summaries(
     user: models.User,
 ) -> list[models.SalmonRunShiftSummaryRaw]:
-    shifts = []
+    summaries = []
+    num_new = 0
     # reverse shifts to get oldest first
     for shift in reversed(get_salmon_run_shifts(user)):
-        shift, created = models.SalmonRunShiftSummaryRaw.objects.get_or_create(
+        summary, created = models.SalmonRunShiftSummaryRaw.objects.get_or_create(
             shift_id=shift["id"],
             uploaded_by=user,
             defaults={
                 "data": shift,
             },
         )
+        summaries.append(summary)
         if created:
-            shifts.append(shift)
-    logger.info("synced shift summaries", user_id=user.id, count=len(shifts))
-    return shifts
+            num_new += 1
+    logger.info("synced shift summaries", user_id=user.id, num_new=num_new)
+    return summaries
 
 
 @with_bullet_token

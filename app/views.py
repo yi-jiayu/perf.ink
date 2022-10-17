@@ -57,10 +57,9 @@ def nintendo_session(request):
 @login_required
 def salmon_run_sync(request):
     summaries = services.sync_salmon_run_shift_summaries(request.user)
-    if summaries:
-        tasks.sync_salmon_run_shift_details.delay(
-            request.user.id, [summary.id for summary in summaries]
-        )
+    tasks.sync_salmon_run_shift_details.delay(
+        request.user.id, [summary.id for summary in summaries]
+    )
     return redirect("profile")
 
 
