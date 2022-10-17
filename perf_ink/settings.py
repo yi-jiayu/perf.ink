@@ -12,7 +12,25 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 
+import dj_database_url
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 from .config import config
+
+sentry_sdk.init(
+    dsn=config.sentry_dsn,
+    integrations=[
+        DjangoIntegration(),
+    ],
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0,
+    # If you wish to associate users to errors (assuming you are using
+    # django.contrib.auth) you may enable sending PII data.
+    send_default_pii=True,
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +39,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-=b3cr5ixhw9tc^&pbo9fs^zv9)7#9rf4=q06ar@e*$u3tm(%qw"
+SECRET_KEY = config.secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config.debug
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config.allowed_hosts
+CSRF_TRUSTED_ORIGINS = config.csrf_trusted_origins
 
 # Application definition
 
@@ -77,16 +96,7 @@ WSGI_APPLICATION = "perf_ink.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config.database_name,
-        'USER': config.database_user,
-        'PASSWORD': config.database_password,
-        'HOST': config.database_host,
-        'PORT': config.database_port,
-    }
-}
+DATABASES = {"default": dj_database_url.parse(config.database_url)}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
