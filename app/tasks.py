@@ -6,7 +6,7 @@ from . import models, services
 logger = structlog.get_logger(__name__)
 
 
-@shared_task
+@shared_task(autoretry_for=(TimeoutError,), retry_backoff=True)
 def sync_salmon_run_shift_details(user_id: int, summary_ids: list[int]) -> None:
     user = models.User.objects.get(pk=user_id)
     summaries = models.SalmonRunShiftSummaryRaw.objects.filter(pk__in=summary_ids).only(
