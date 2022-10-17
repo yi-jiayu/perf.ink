@@ -20,5 +20,13 @@ COPY --from=builder /workspace/.venv /workspace/.venv
 COPY . /workspace/
 
 WORKDIR /workspace
+ENV PATH="/workspace/.venv/bin:$PATH"
+ENV PYTHONUNBUFFERED=1
 
-ENTRYPOINT ["/workspace/.venv/bin/gunicorn", "--timeout", "300", "perf_ink.wsgi:application"]
+ARG UID=1000
+ARG GID=1000
+
+RUN groupadd -g "${GID}" app \
+  && useradd --create-home --no-log-init -u "${UID}" -g "${GID}" app
+
+USER app
