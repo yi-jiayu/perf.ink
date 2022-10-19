@@ -9,6 +9,9 @@
         {{ nintendo_session_form }}
         <input type="submit" value="Save">
     </form>
+    {% if not nintendo_session_form.initial.token %}
+        <a href="{% url "new_nintendo_session" %}">Get Nintendo token</a>
+    {% endif %}
 </div>
 
 <div>
@@ -33,13 +36,13 @@
             <input type="submit" value="Sync">
         </form>
     </div>
-    <div>
+    <ul>
         {% for shift in shifts %}
-            <a href="{% url 'salmon_run_shift_detail' shift.id %}">
-                <div>
+            <li>
+                <a href="{% url 'salmon_run_shift_detail' shift.id %}">
                     {{ shift.rank }} {{ shift.points }} {{ shift.change }}
-                </div>
-            </a>
+                </a>
+            </li>
         {% endfor %}
-    </div>
+    </ul>
 </div>

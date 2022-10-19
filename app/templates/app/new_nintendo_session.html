@@ -1,0 +1,7 @@
+<p>Visit the following URL, right click "Select this account", copy the link address and submit it below:</p>
+<a href="{{ nintendo_sign_in_url }}" target="_blank" rel="noopener">{{ nintendo_sign_in_url }}</a>
+<form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Get Nintendo token">
+</form>

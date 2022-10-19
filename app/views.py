@@ -1,5 +1,8 @@
+import httpx
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+
+import splatnet
 
 from . import forms, models, services, tasks
 
@@ -39,6 +42,31 @@ def profile(request):
         "shifts": shifts,
     }
     return render(request, "app/profile.html", context)
+
+
+def new_nintendo_session(request):
+    if request.method == "POST":
+        form = forms.NintendoSessionRequestForm(request.POST)
+        if not form.is_valid():
+            return redirect("new_nintendo_session")
+        verifier = request.session["verifier"]
+        with httpx.Client() as client:
+            token = splatnet.get_session_token(
+                client, form.cleaned_data["url"], verifier
+            )
+        models.NintendoSession.objects.update_or_create(
+            user=request.user, defaults={"token": token}
+        )
+        return redirect("profile")
+
+    with httpx.Client() as client:
+        verifier, nintendo_sign_in_url = splatnet.request_session_token(client)
+    request.session["verifier"] = verifier
+    context = {
+        "nintendo_sign_in_url": nintendo_sign_in_url,
+        "form": forms.NintendoSessionRequestForm(),
+    }
+    return render(request, "app/new_nintendo_session.html", context)
 
 
 @login_required
