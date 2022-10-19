@@ -1,4 +1,7 @@
 .venv
 __pycache__
 .mypy_cache
+
+# all .env files except template.env
 *.env
+!template.env
