@@ -20,13 +20,12 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 COPY --from=builder /app/.venv /app/.venv
-COPY template.env /app/.env
 COPY . /app/
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
 
-RUN ["python", "manage.py", "collectstatic", "--noinput"]
+RUN SECRET_KEY=dummy python manage.py collectstatic --no-input
 
 ARG UID=1000
 ARG GID=1000
