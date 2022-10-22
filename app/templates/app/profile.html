@@ -3,56 +3,58 @@
 <div><h1>Welcome, {{ user.username }}!</h1></div>
 
 <div>
-    <h2>Nintendo</h2>
-    <form action="/accounts/nintendo_session/" method="post">
-        {% csrf_token %}
-        {{ nintendo_session_form }}
-        <input type="submit" value="Save">
+  <h2>Nintendo</h2>
+  <form action="/accounts/nintendo_session/" method="post">
+    {% csrf_token %}
+    {{ nintendo_session_form }}
+    <input type="submit" value="Save">
+  </form>
+  {% if not nintendo_session_form.initial.token %}
+    <a href="{% url "new_nintendo_session" %}">Get Nintendo token</a>
+  {% endif %}
+</div>
+
+<div>
+  <h2>Splatnet</h2>
+  {% if splatnet_session %}
+    <dl>
+      <dt>Web service token</dt>
+      <dd><input value="{{ splatnet_session.web_service_token }}" readonly></dd>
+      <dt>Bullet token</dt>
+      <dd><input value="{{ splatnet_session.bullet_token }}" readonly></dd>
+      <dt>Updated at</dt>
+      <dd>{{ splatnet_session.updated_at }} ({{ splatnet_session.updated_at|naturaltime }})</dd>
+    </dl>
+  {% endif %}
+</div>
+
+<div>
+  <h2>Shifts</h2>
+  <div>
+    <form action="/salmon_run/sync/" method="post">
+      {% csrf_token %}
+      <input type="submit" value="Sync">
     </form>
-    {% if not nintendo_session_form.initial.token %}
-        <a href="{% url "new_nintendo_session" %}">Get Nintendo token</a>
-    {% endif %}
-</div>
-
-<div>
-    <h2>Splatnet</h2>
-    {% if splatnet_session %}
-        <dl>
-            <dt>Web service token</dt>
-            <dd>{{ splatnet_session.web_service_token }}</dd>
-            <dt>Bullet token</dt>
-            <dd>{{ splatnet_session.bullet_token }}</dd>
-            <dt>Updated at</dt>
-            <dd>{{ splatnet_session.updated_at }} ({{ splatnet_session.updated_at|naturaltime }})</dd>
-        </dl>
-    {% endif %}
-</div>
-
-<div>
-    <h2>Shifts</h2>
-    <div>
-        <form action="/salmon_run/sync/" method="post">
-            {% csrf_token %}
-            <input type="submit" value="Sync">
-        </form>
-    </div>
-    <ul>
-        {% for shift in shifts %}
-            <li>
-                <p><a href="{% url 'salmon_run_shift_detail' shift.id %}">
-                    {{ shift.rank }} {{ shift.points }} {{ shift.change }}
-                </a></p>
-                {% if shift.detail %}
-                    <dl>
-                        <dt>Hazard level</dt>
-                        <dd>{{ shift.detail.hazard_level }}</dd>
-                        <dt>Boss counts</dt>
-                        <dd>{{ shift.detail.boss_count_individual }} / {{ shift.detail.boss_count_team }} ({{ shift.detail.boss_count_percent }})</dd>
-                        <dt>Rescued count</dt>
-                        <dd>{{ shift.detail.rescued_count_individual }} / {{ shift.detail.rescued_count_team }}</dd>
-                    </dl>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
+  </div>
+  <ul>
+    {% for shift in shifts %}
+      <li>
+        <p><a href="{% url 'salmon_run_shift_detail' shift.id %}">
+          {{ shift.rank }} {{ shift.points }} {{ shift.change }}
+        </a></p>
+        {% if shift.detail %}
+          <dl>
+            <dt>Hazard level</dt>
+            <dd>{{ shift.detail.hazard_level }}</dd>
+            <dt>Boss counts</dt>
+            <dd>{{ shift.detail.boss_count_individual }} / {{ shift.detail.boss_count_team }}
+              ({{ shift.detail.boss_count_percent }})
+            </dd>
+            <dt>Rescued count</dt>
+            <dd>{{ shift.detail.rescued_count_individual }} / {{ shift.detail.rescued_count_team }}</dd>
+          </dl>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
 </div>
