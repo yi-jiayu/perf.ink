@@ -35,4 +35,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --app ${{ secrets.FLY_APP_NAME }}
+      - run: flyctl deploy --app ${{ secrets.FLY_APP_NAME }} --remote-only
