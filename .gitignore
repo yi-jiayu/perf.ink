@@ -5,3 +5,6 @@ __pycache__
 # all .env files except template.env
 *.env
 !template.env
+
+# Django static root
+www
