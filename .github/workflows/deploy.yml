@@ -1,0 +1,35 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.10
+    - name: Install Poetry and dependencies
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        poetry install
+        source .venv/bin/activate
+    - name: Run tests
+      run: |
+        pytest
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --app ${{ secrets.FLY_APP_NAME }}
