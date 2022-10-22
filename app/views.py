@@ -7,6 +7,10 @@ import splatnet
 from . import forms, models, services, tasks
 
 
+def index(request):
+    return render(request, "base.html")
+
+
 @login_required
 def profile(request):
     try:

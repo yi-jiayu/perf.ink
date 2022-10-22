@@ -46,6 +46,9 @@ DEBUG = config.debug
 
 ALLOWED_HOSTS = config.allowed_hosts
 CSRF_TRUSTED_ORIGINS = config.csrf_trusted_origins
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 # Application definition
 
@@ -60,6 +63,9 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+    "tailwind",
+    "theme",
+    "django_browser_reload",
     "app",
 ]
 
@@ -71,6 +77,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 ROOT_URLCONF = "perf_ink.urls"
@@ -148,3 +155,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
 
 CELERY_BROKER_URL = config.celery_broker_url
+
+TAILWIND_APP_NAME = "theme"
+
+LOGIN_REDIRECT_URL = "/"
