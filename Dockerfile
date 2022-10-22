@@ -8,7 +8,7 @@ RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/etc/poetry python
 
 COPY pyproject.toml poetry.lock poetry.toml /workspace/
 WORKDIR /workspace
-RUN ["/etc/poetry/bin/poetry", "install"]
+RUN ["/etc/poetry/bin/poetry", "install", "--no-root", "--without=dev"]
 
 FROM python:3.10-slim
 

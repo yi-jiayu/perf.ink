@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         poetry env info
-        poetry install
+        poetry install --no-root
     - name: Run tests
       run: |
         poetry run pytest
