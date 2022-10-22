@@ -39,9 +39,19 @@
     <ul>
         {% for shift in shifts %}
             <li>
-                <a href="{% url 'salmon_run_shift_detail' shift.id %}">
+                <p><a href="{% url 'salmon_run_shift_detail' shift.id %}">
                     {{ shift.rank }} {{ shift.points }} {{ shift.change }}
-                </a>
+                </a></p>
+                {% if shift.detail %}
+                    <dl>
+                        <dt>Hazard level</dt>
+                        <dd>{{ shift.detail.hazard_level }}</dd>
+                        <dt>Boss counts</dt>
+                        <dd>{{ shift.detail.boss_count_individual }} / {{ shift.detail.boss_count_team }} ({{ shift.detail.boss_count_percent }})</dd>
+                        <dt>Rescued count</dt>
+                        <dd>{{ shift.detail.rescued_count_individual }} / {{ shift.detail.rescued_count_team }}</dd>
+                    </dl>
+                {% endif %}
             </li>
         {% endfor %}
     </ul>

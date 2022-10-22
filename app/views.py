@@ -27,18 +27,34 @@ def profile(request):
         splatnet_session = None
 
     shifts = []
-    for shift in models.SalmonRunShiftSummaryRaw.objects.filter(
-        uploaded_by=request.user
-    ).order_by("-uploaded_at"):
-        data = shift.data
-        shifts.append(
-            {
-                "id": data["id"],
-                "rank": data["afterGrade"]["name"],
-                "points": data["afterGradePoint"],
-                "change": data["gradePointDiff"],
-            }
+    summaries = list(
+        models.SalmonRunShiftSummaryRaw.objects.filter(
+            uploaded_by=request.user
+        ).order_by("-uploaded_at")[:50]
+    )
+    details = {
+        detail.shift_id: detail
+        for detail in models.SalmonRunShiftDetailRaw.objects.filter(
+            shift_id__in=[summary.shift_id for summary in summaries]
         )
+    }
+    for summary in summaries:
+        data = {
+            "id": summary.data["id"],
+            "rank": summary.data["afterGrade"]["name"],
+            "points": summary.data["afterGradePoint"],
+            "change": summary.data["gradePointDiff"],
+        }
+        if detail := details.get(summary.shift_id):
+            data["detail"] = {
+                "hazard_level": detail.hazard_level,
+                "boss_count_individual": detail.boss_count_individual,
+                "boss_count_team": detail.boss_count_team,
+                "boss_count_percent": detail.boss_count_percent,
+                "rescued_count_individual": detail.rescued_count_individual,
+                "rescued_count_team": detail.rescued_count_team,
+            }
+        shifts.append(data)
 
     context = {
         "nintendo_session_form": nintendo_session_form,
