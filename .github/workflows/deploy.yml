@@ -13,7 +13,8 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: 3.10
+        python-version: '3.10'
+        cache: poetry
     - name: Install Poetry and dependencies
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
@@ -24,6 +25,7 @@ jobs:
         pytest
 
   deploy:
+    needs: test
     runs-on: ubuntu-latest
 
     env:
