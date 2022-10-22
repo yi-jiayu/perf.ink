@@ -1,4 +1,4 @@
-name: Django CI
+name: Deploy
 
 on:
   push:
@@ -19,11 +19,11 @@ jobs:
         cache: poetry
     - name: Install dependencies
       run: |
+        poetry env info
         poetry install
-        source .venv/bin/activate
     - name: Run tests
       run: |
-        pytest
+        poetry run pytest
 
   deploy:
     needs: test
