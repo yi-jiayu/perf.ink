@@ -9,43 +9,53 @@
     </header>
     <main>
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <ol class="grid gap-y-2">
-          {% for summary in summaries %}
-            <li>
-              <a href="{% url "shifts_show" summary.shift_id %}">
-                <div class="px-4 py-2 border-2 rounded-md">
-                  <div class="flex justify-between">
-                    <div>{{ summary.grade }} {{ summary.grade_points }}</div>
-                    {% if summary.change == "UP" %}
-                      <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                             stroke="currentColor" class="w-6 h-6">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/>
-                        </svg>
-                      </div>
-                    {% elif summary.change == "DOWN" %}
-                      <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                             stroke="currentColor" class="w-6 h-6">
-                          <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"/>
-                        </svg>
-                      </div>
-                    {% else %}
-                      <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                             stroke="currentColor" class="w-6 h-6">
-                          <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
-                        </svg>
-                      </div>
-                    {% endif %}
+        <div class="grid gap-y-4">
+          <form action="{% url "salmon_run_sync" %}" method="post">
+            {% csrf_token %}
+            <button type="submit"
+                    class="px-2 py-1 bg-blue-600 border-2 border-blue-600 rounded-md text-white">
+              Refresh
+            </button>
+          </form>
+          <ol class="grid gap-y-2">
+            {% for summary in summaries %}
+              <li>
+                <a href="{% url "shifts_show" summary.shift_id %}">
+                  <div class="px-4 py-2 border-2 rounded-md">
+                    <div class="flex justify-between">
+                      <div>{{ summary.grade }} {{ summary.grade_points }}</div>
+                      {% if summary.change == "UP" %}
+                        <div>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                               stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/>
+                          </svg>
+                        </div>
+                      {% elif summary.change == "DOWN" %}
+                        <div>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                               stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"/>
+                          </svg>
+                        </div>
+                      {% else %}
+                        <div>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                               stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                          </svg>
+                        </div>
+                      {% endif %}
+                    </div>
                   </div>
-                </div>
-              </a>
-            </li>
-          {% endfor %}
-        </ol>
+                </a>
+              </li>
+            {% endfor %}
+          </ol>
+        </div>
       </div>
     </main>
   </div>

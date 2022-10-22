@@ -138,7 +138,7 @@ def salmon_run_sync(request):
     tasks.sync_salmon_run_shift_details.delay(
         request.user.id, [summary.id for summary in summaries]
     )
-    return redirect("profile")
+    return redirect("shifts_index")
 
 
 @login_required
