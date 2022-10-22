@@ -1,5 +1,6 @@
 import httpx
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 import splatnet
@@ -7,8 +8,37 @@ import splatnet
 from . import forms, models, services, tasks
 
 
-def index(request):
-    return render(request, "base.html")
+@login_required
+def shifts_index(request):
+    summaries = models.SalmonRunShiftSummaryRaw.objects.filter(
+        uploaded_by=request.user
+    ).order_by("-uploaded_at")[:50]
+    context = {
+        "summaries": summaries,
+    }
+    return render(request, "app/shifts_index.html", context)
+
+
+@login_required
+def shifts_show(request, shift_id: str):
+    try:
+        detail = models.SalmonRunShiftDetailRaw.objects.get(
+            shift_id=shift_id, uploaded_by=request.user
+        )
+        loading = False
+    except models.SalmonRunShiftDetailRaw.DoesNotExist:
+        detail = None
+        loading = models.SalmonRunShiftSummaryRaw.objects.filter(
+            shift_id=shift_id, uploaded_by=request.user
+        ).exists()
+
+    if detail is None and not loading:
+        raise Http404()
+    context = {
+        "detail": detail,
+        "loading": loading,
+    }
+    return render(request, "app/shifts_show.html", context)
 
 
 @login_required

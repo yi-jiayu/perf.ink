@@ -1,0 +1,1 @@
+./theme/static_src/tailwind.config.js

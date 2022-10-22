@@ -1,0 +1,42 @@
+{% extends "app/base.html" %}
+
+{% block content %}
+  <div class="py-10 grid gap-y-4">
+    <header>
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold leading-tight tracking-tight text-gray-900">Shift detail</h1>
+      </div>
+    </header>
+    <main>
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {% if loading %}
+          <div>Loading...</div>
+        {% else %}
+          <div>
+            <div>
+              <dl>
+                <dt>Hazard level</dt>
+                <dd>{{ detail.hazard_level_formatted }}</dd>
+                <dt>Pay grade</dt>
+                <dd>{{ detail.grade }} {{ detail.grade_points }}</dd>
+                <dt>Bosses defeated
+                </dd>
+                <dd>{{ detail.boss_count_individual }} / {{ detail.boss_count_team }}
+                  ({{ detail.boss_count_percent }})
+                </dt>
+                <dt>Times rescued</dt>
+                <dd>{{ detail.rescued_count_individual }} / {{ detail.rescued_count_team }}</dd>
+              </dl>
+            </div>
+            <div>
+              <h2>Players</h2>
+            </div>
+            <div>
+              <h2>Bosses</h2>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+{% endblock %}

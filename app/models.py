@@ -35,6 +35,18 @@ class SalmonRunShiftSummaryRaw(models.Model):
             ),
         ]
 
+    @property
+    def grade(self):
+        return self.data["afterGrade"]["name"]
+
+    @property
+    def grade_points(self):
+        return self.data["afterGradePoint"]
+
+    @property
+    def change(self):
+        return self.data["gradePointDiff"]
+
 
 class SalmonRunShiftDetailRaw(models.Model):
     shift_id = models.TextField()
@@ -54,11 +66,15 @@ class SalmonRunShiftDetailRaw(models.Model):
         return self.data["data"]["coopHistoryDetail"]["dangerRate"]
 
     @property
-    def rank(self) -> str:
+    def hazard_level_formatted(self):
+        return f"{self.hazard_level * 100:.1f}%"
+
+    @property
+    def grade(self) -> str:
         return self.data["data"]["coopHistoryDetail"]["afterGrade"]["name"]
 
     @property
-    def rank_points(self) -> int:
+    def grade_points(self) -> int:
         return self.data["data"]["coopHistoryDetail"]["afterGradePoint"]
 
     @property
