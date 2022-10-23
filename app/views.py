@@ -10,11 +10,15 @@ from . import forms, models, services, tasks
 
 @login_required
 def shifts_index(request):
-    summaries = models.SalmonRunShiftSummaryRaw.objects.filter(
-        uploaded_by=request.user
-    ).order_by("-uploaded_at")[:50]
+    summaries = list(
+        models.SalmonRunShiftSummaryRaw.objects.filter(
+            uploaded_by=request.user
+        ).order_by("-uploaded_at")[:50]
+    )
+    highest_grade_points = max(summary.grade_points for summary in summaries)
     context = {
         "summaries": summaries,
+        "highest_grade_points": highest_grade_points,
     }
     return render(request, "app/shifts_index.html", context)
 
