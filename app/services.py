@@ -102,21 +102,24 @@ def get_salmon_run_shift_detail(bullet_token: str, shift_id: str) -> dict:
 
 @transaction.atomic
 def sync_salmon_run_shift_detail(
-    user: models.User, raw: models.SalmonRunShiftSummaryRaw
+    user: models.User, summary: models.SalmonRunShiftSummaryRaw
 ) -> tuple[models.SalmonRunShiftDetailRaw, bool]:
-    raw = models.SalmonRunShiftSummaryRaw.objects.select_for_update().get(pk=raw.pk)
+    summary = models.SalmonRunShiftSummaryRaw.objects.select_for_update().get(
+        pk=summary.pk
+    )
     try:
         return (
             models.SalmonRunShiftDetailRaw.objects.get(
-                uploaded_by=user, shift_id=raw.shift_id
+                uploaded_by=user, shift_id=summary.shift_id
             ),
             False,
         )
     except models.SalmonRunShiftDetailRaw.DoesNotExist:
-        data = get_salmon_run_shift_detail(user, raw.shift_id)
+        data = get_salmon_run_shift_detail(user, summary.shift_id)
         return (
             models.SalmonRunShiftDetailRaw.objects.create(
-                shift_id=raw.shift_id,
+                summary=summary,
+                shift_id=summary.shift_id,
                 uploaded_by=user,
                 data=data,
             ),

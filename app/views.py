@@ -11,14 +11,16 @@ from . import forms, models, services, tasks
 @login_required
 def shifts_index(request):
     summaries = list(
-        models.SalmonRunShiftSummaryRaw.objects.filter(
-            uploaded_by=request.user
-        ).order_by("-uploaded_at")[:50]
+        models.SalmonRunShiftSummaryRaw.objects.filter(uploaded_by=request.user)
+        .select_related("detail")
+        .order_by("-uploaded_at")[:50]
     )
     highest_grade_points = max(summary.grade_points for summary in summaries)
+    highest_hazard_level = max(summary.detail.hazard_level for summary in summaries)
     context = {
         "summaries": summaries,
         "highest_grade_points": highest_grade_points,
+        "highest_hazard_level": highest_hazard_level,
     }
     return render(request, "app/shifts_index.html", context)
 

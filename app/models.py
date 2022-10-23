@@ -49,6 +49,9 @@ class SalmonRunShiftSummaryRaw(models.Model):
 
 
 class SalmonRunShiftDetailRaw(models.Model):
+    summary = models.OneToOneField(
+        SalmonRunShiftSummaryRaw, on_delete=models.CASCADE, related_name="detail"
+    )
     shift_id = models.TextField()
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     data = models.JSONField()
@@ -63,11 +66,47 @@ class SalmonRunShiftDetailRaw(models.Model):
 
     @property
     def hazard_level(self) -> float:
-        return self.data["data"]["coopHistoryDetail"]["dangerRate"]
+        return self.data["data"]["coopHistoryDetail"]["dangerRate"] * 100
 
     @property
     def hazard_level_formatted(self):
         return f"{self.hazard_level * 100:.1f}%"
+
+    @property
+    def golden_eggs_delivered_individual(self):
+        return self.data["data"]["coopHistoryDetail"]["myResult"]["goldenDeliverCount"]
+
+    @property
+    def golden_eggs_assisted_individual(self):
+        return self.data["data"]["coopHistoryDetail"]["myResult"]["goldenAssistCount"]
+
+    @property
+    def golden_eggs_contributed_individual(self):
+        return (
+            self.golden_eggs_delivered_individual + self.golden_eggs_assisted_individual
+        )
+
+    @property
+    def contributed_most_golden_eggs(self):
+        """
+        Returns true if the player delivered the most golden eggs.
+        """
+        return all(
+            self.golden_eggs_contributed_individual
+            > (teammate["goldenDeliverCount"] + teammate["goldenAssistCount"])
+            for teammate in self.data["data"]["coopHistoryDetail"]["memberResults"]
+        )
+
+    @property
+    def defeated_most_bosses(self):
+        """
+        Returns true if the player defeated the most bosses.
+        """
+        return all(
+            self.data["data"]["coopHistoryDetail"]["myResult"]["defeatEnemyCount"]
+            > teammate["defeatEnemyCount"]
+            for teammate in self.data["data"]["coopHistoryDetail"]["memberResults"]
+        )
 
     @property
     def grade(self) -> str:

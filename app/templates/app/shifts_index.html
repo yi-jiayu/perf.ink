@@ -21,10 +21,26 @@
             {% for summary in summaries %}
               <li>
                 <a href="{% url "shifts_show" summary.shift_id %}">
-                  <div class="px-4 py-2 border-2 border-gray-200 rounded-md h-12 grid items-center relative">
+                  <div class="px-4 py-2 border-2 border-gray-200 rounded-md h-16 grid relative">
                     <div class="flex justify-between">
                       <div>{{ summary.grade }} {{ summary.grade_points }}</div>
+                      <div>
+                        {% if summary.detail %}
+                          {% if summary.detail.rescued_count_individual == 0 %}<span title="No deaths">🏅</span>
+                          {% endif %}
+                          {% if summary.detail.contributed_most_golden_eggs %}
+                            <span title="Most golden eggs contributed">🏆</span>{% endif %}
+                          {% if summary.detail.defeated_most_bosses %}<span title="Most bosses defeated">🎖</span>
+                          {% endif %}
+                        {% endif %}
+                      </div>
                     </div>
+                    {% if summary.detail %}
+                      <div class="absolute h-full border-r-2 border-gray-400 grid justify-end items-end pr-2"
+                           style="width: {% widthratio summary.detail.hazard_level highest_hazard_level 100 %}%">
+                        <span class="text-gray-600">{{ summary.detail.hazard_level|floatformat:0 }}%</span>
+                      </div>
+                    {% endif %}
                     {% if summary.grade == "Eggsecutive VP" and highest_grade_points > 100 %}
                       <div class="absolute h-full bg-gray-200 -z-10"
                            style="width: {% widthratio summary.grade_points highest_grade_points 100 %}%"></div>
