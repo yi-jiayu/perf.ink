@@ -36,16 +36,16 @@
                       </div>
                     </div>
                     {% if summary.detail %}
-                      <div class="absolute h-full border-r-2 border-gray-400 grid justify-end items-end pr-2"
+                      <div class="absolute h-full border-r-2 border-gray-400 grid justify-end items-end pr-2 -z-10"
                            style="width: {% widthratio summary.detail.hazard_level highest_hazard_level 100 %}%">
                         <span class="text-gray-600">{{ summary.detail.hazard_level|floatformat:0 }}%</span>
                       </div>
                     {% endif %}
                     {% if summary.grade == "Eggsecutive VP" and highest_grade_points > 100 %}
-                      <div class="absolute h-full bg-gray-200 -z-10"
+                      <div class="absolute h-full bg-gray-200 -z-20"
                            style="width: {% widthratio summary.grade_points highest_grade_points 100 %}%"></div>
                     {% else %}
-                      <div class="absolute h-full bg-gray-200 -z-10"
+                      <div class="absolute h-full bg-gray-200 -z-20"
                            style="width: {% widthratio summary.grade_points 100 100 %}%"></div>
                     {% endif %}
                   </div>
