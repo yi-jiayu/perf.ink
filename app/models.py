@@ -142,3 +142,39 @@ class SalmonRunShiftDetailRaw(models.Model):
             result["rescuedCount"]
             for result in self.data["data"]["coopHistoryDetail"]["memberResults"]
         )
+
+
+# class SalmonRunRotation(models.Model):
+#     start_end_time = DateTimeRangeField()
+#     stage = models.TextField()
+#     weapons = ArrayField(models.TextField())
+#
+#
+# class SalmonRunShiftSummary(models.Model):
+#     rotation = models.ForeignKey(SalmonRunRotation, on_delete=models.CASCADE, null=True)
+#     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+#     raw = models.ForeignKey(SalmonRunShiftSummaryRaw, on_delete=models.CASCADE)
+#
+#     grade = models.TextField()
+#     grade_points = models.IntegerField()
+#     change = models.TextField()
+#
+#
+# class SalmonRunShiftDetail(models.Model):
+#     summary = models.OneToOneField(SalmonRunShiftSummary, on_delete=models.CASCADE)
+#     raw = models.ForeignKey(SalmonRunShiftDetailRaw, on_delete=models.CASCADE)
+#
+#     hazard_level = models.FloatField()
+#
+#
+# class SalmonRunWave(models.Model):
+#     shift = models.ForeignKey(SalmonRunShiftDetail, on_delete=models.CASCADE)
+#
+#     number = models.IntegerField()
+#     cleared = models.BooleanField()
+#     tide = models.TextField()
+#     event = models.TextField()
+#     quota = models.IntegerField()
+#     delivered = models.IntegerField()
+#     power_eggs = models.IntegerField()
+#     specials_used = ArrayField(models.TextField())

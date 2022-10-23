@@ -15,8 +15,17 @@ def shifts_index(request):
         .select_related("detail")
         .order_by("-uploaded_at")[:50]
     )
-    highest_grade_points = max(summary.grade_points for summary in summaries)
-    highest_hazard_level = max(summary.detail.hazard_level for summary in summaries)
+    highest_grade_points = max(
+        (summary.grade_points for summary in summaries), default=0
+    )
+    highest_hazard_level = max(
+        (
+            summary.detail.hazard_level
+            for summary in summaries
+            if hasattr(summary, "detail")
+        ),
+        default=0,
+    )
     context = {
         "summaries": summaries,
         "highest_grade_points": highest_grade_points,
