@@ -77,20 +77,17 @@ def sync_salmon_run_shift_summaries(
     user: models.User,
 ) -> list[models.SalmonRunShiftSummaryRaw]:
     summaries = []
-    num_new = 0
     # reverse shifts to get oldest first
     for shift in reversed(get_salmon_run_shifts(user)):
-        summary, created = models.SalmonRunShiftSummaryRaw.objects.get_or_create(
+        summary = models.SalmonRunShiftSummaryRaw(
             shift_id=shift["id"],
             uploaded_by=user,
-            defaults={
-                "data": shift,
-            },
+            data=shift,
         )
         summaries.append(summary)
-        if created:
-            num_new += 1
-    logger.info("synced shift summaries", user_id=user.id, num_new=num_new)
+    summaries = models.SalmonRunShiftSummaryRaw.objects.bulk_create(
+        summaries, ignore_conflicts=True
+    )
     return summaries
 
 
@@ -98,30 +95,3 @@ def sync_salmon_run_shift_summaries(
 def get_salmon_run_shift_detail(bullet_token: str, shift_id: str) -> dict:
     with httpx.Client() as client:
         return splatnet.get_salmon_run_job_detail(client, bullet_token, shift_id)
-
-
-@transaction.atomic
-def sync_salmon_run_shift_detail(
-    user: models.User, summary: models.SalmonRunShiftSummaryRaw
-) -> tuple[models.SalmonRunShiftDetailRaw, bool]:
-    summary = models.SalmonRunShiftSummaryRaw.objects.select_for_update().get(
-        pk=summary.pk
-    )
-    try:
-        return (
-            models.SalmonRunShiftDetailRaw.objects.get(
-                uploaded_by=user, shift_id=summary.shift_id
-            ),
-            False,
-        )
-    except models.SalmonRunShiftDetailRaw.DoesNotExist:
-        data = get_salmon_run_shift_detail(user, summary.shift_id)
-        return (
-            models.SalmonRunShiftDetailRaw.objects.create(
-                summary=summary,
-                shift_id=summary.shift_id,
-                uploaded_by=user,
-                data=data,
-            ),
-            True,
-        )
