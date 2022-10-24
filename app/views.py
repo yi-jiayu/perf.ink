@@ -160,3 +160,12 @@ def salmon_run_sync(request):
 def salmon_run_shift_detail(request, shift_id: str):
     detail = get_object_or_404(models.SalmonRunShiftDetailRaw, shift_id=shift_id)
     return render(request, "app/salmon_run_shift_detail.html", {"detail": detail})
+
+
+@login_required
+def statistics_index(request):
+    shifts_uploaded = models.SalmonRunShiftSummaryRaw.objects.filter(
+        uploaded_by=request.user
+    ).count()
+    context = {"shifts_uploaded": shifts_uploaded}
+    return render(request, "app/statistics_index.html", context)

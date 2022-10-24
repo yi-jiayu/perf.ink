@@ -12,9 +12,14 @@
 <body class="h-full">
 <div>
   <nav class="p-4 text-lg flex justify-between text-gray-600">
-    <div class="flex gap-x-4"><a href="{% url "shifts_index" %}">Shifts</a>
-      <a href="{% url "profile" %}">Settings</a></div>
-    <div><a href="{% url "account_logout" %}">Sign out</a></div>
+    <div class="flex gap-x-4">
+      <a href="{% url "shifts_index" %}">Shifts</a>
+      <a href="{% url "statistics_index" %}">Statistics</a>
+      <a href="{% url "profile" %}">Settings</a>
+    </div>
+    <div>
+      <a href="{% url "account_logout" %}">Sign out</a>
+    </div>
   </nav>
 </div>
 {% block content %}
