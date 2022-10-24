@@ -12,5 +12,14 @@ class Config(BaseSettings):
     database_url: str = "postgres:///perf_ink"
     celery_broker_url: str = "redis://"
 
+    email_host: str = ""
+    email_host_password: str = ""
+    email_host_user: str = ""
+
+    account_email_verification: str = "none"
+
+    default_from_email: str = ""
+    server_email: str = ""
+
 
 config = Config(_env_file=".env", _env_file_encoding="utf-8")

@@ -153,10 +153,22 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_EMAIL_VERIFICATION = config.account_email_verification
 
 CELERY_BROKER_URL = config.celery_broker_url
 
 TAILWIND_APP_NAME = "theme"
 
 LOGIN_REDIRECT_URL = "/"
+
+EMAIL_HOST = config.email_host
+EMAIL_HOST_USER = config.email_host_user
+EMAIL_HOST_PASSWORD = config.email_host_password
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+
+if config.default_from_email:
+    DEFAULT_FROM_EMAIL = config.default_from_email
+
+if config.server_email:
+    SERVER_EMAIL = config.server_email
