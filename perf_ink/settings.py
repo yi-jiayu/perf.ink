@@ -53,6 +53,13 @@ INTERNAL_IPS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "app",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "tailwind",
+    "theme",
+    "django_browser_reload",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -60,13 +67,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "tailwind",
-    "theme",
-    "django_browser_reload",
-    "app",
 ]
 
 MIDDLEWARE = [

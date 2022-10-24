@@ -70,7 +70,7 @@ class SalmonRunShiftDetailRaw(models.Model):
 
     @property
     def hazard_level_formatted(self):
-        return f"{self.hazard_level * 100:.1f}%"
+        return f"{self.hazard_level:.1f}%"
 
     @property
     def golden_eggs_delivered_individual(self):

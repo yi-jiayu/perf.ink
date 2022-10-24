@@ -2,14 +2,21 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
-    <title>perf.ink</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    {% tailwind_css %}
+  <title>perf.ink</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  {% tailwind_css %}
 </head>
 
 <body class="h-full">
+<div>
+  <nav class="p-4 text-lg flex justify-between text-gray-600">
+    <div class="flex gap-x-4"><a href="{% url "shifts_index" %}">Shifts</a>
+      <a href="{% url "profile" %}">Settings</a></div>
+    <div><a href="{% url "account_logout" %}">Sign out</a></div>
+  </nav>
+</div>
 {% block content %}
 
 {% endblock %}
