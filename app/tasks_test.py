@@ -50,6 +50,8 @@ def _test_sync_salmon_run_shift_details_concurrency():
 
     The latter condition is not automatically checked, but can be verified by
     inspecting the logs.
+
+    This test is only for running manually, hence the underscore name prefix.
     """
 
     user = factories.UserFactory()
@@ -100,3 +102,6 @@ with patch(
     p2.start()
     p1.join()
     p2.join()
+
+    assert p1.exitcode == 0
+    assert p2.exitcode == 0
