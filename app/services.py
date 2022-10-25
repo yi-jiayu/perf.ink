@@ -1,6 +1,9 @@
-from typing import Callable, Concatenate, ParamSpec, TypeVar
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Callable, Concatenate, Iterable, ParamSpec, TypeVar
 
 import httpx
+import pendulum
 import structlog
 from django.db import transaction
 
@@ -58,33 +61,65 @@ def with_bullet_token(
     return wrapper
 
 
-@with_bullet_token
-def get_salmon_run_shifts(bullet_token: str) -> list[dict]:
-    """
-    Returns shifts in reverse chronological order (newest first).
-    """
-    with httpx.Client() as client:
-        data = splatnet.get_salmon_run_jobs(client, bullet_token)
-    shifts = []
+@dataclass
+class SummaryGroup:
+    start_end_time: tuple[datetime, datetime]
+    stage: str
+    weapons: list[str]
+    shifts: list[dict]
+
+
+def group_salmon_run_jobs(data: dict) -> Iterable[SummaryGroup]:
     groups = data["data"]["coopResult"]["historyGroups"]["nodes"]
     for group in groups:
-        for shift in group["historyDetails"]["nodes"]:
-            shifts.append(shift)
-    return shifts
+        start_end_time = (
+            pendulum.parse(group["startTime"]),
+            pendulum.parse(group["endTime"]),
+        )
+        shifts = group["historyDetails"]["nodes"]
+        # there should always be at least one shift in a group
+        stage = shifts[0]["coopStage"]["name"]
+        weapons = [weapon["name"] for weapon in shifts[0]["weapons"]]
+
+        yield SummaryGroup(
+            start_end_time=start_end_time,
+            stage=stage,
+            weapons=weapons,
+            shifts=shifts,
+        )
 
 
+@with_bullet_token
+def get_summary_groups(bullet_token: str) -> list[SummaryGroup]:
+    with httpx.Client() as client:
+        data = splatnet.get_salmon_run_jobs(client, bullet_token)
+    return list(group_salmon_run_jobs(data))
+
+
+@transaction.atomic
 def sync_salmon_run_shift_summaries(
     user: models.User,
 ) -> list[models.SalmonRunShiftSummaryRaw]:
+    groups = get_summary_groups(user)
     summaries = []
-    # reverse shifts to get oldest first
-    for shift in reversed(get_salmon_run_shifts(user)):
-        summary = models.SalmonRunShiftSummaryRaw(
-            shift_id=shift["id"],
-            uploaded_by=user,
-            data=shift,
+    # reverse groups to get oldest first
+    for group in reversed(groups):
+        rotation, created = models.SalmonRunRotation.objects.get_or_create(
+            start_end_time=group.start_end_time,
+            stage=group.stage,
+            defaults={
+                "weapons": group.weapons,
+            },
         )
-        summaries.append(summary)
+        # reverse shifts to get oldest first
+        for shift in reversed(group.shifts):
+            summary = models.SalmonRunShiftSummaryRaw(
+                rotation=rotation,
+                shift_id=shift["id"],
+                uploaded_by=user,
+                data=shift,
+            )
+            summaries.append(summary)
     summaries = models.SalmonRunShiftSummaryRaw.objects.bulk_create(
         summaries, ignore_conflicts=True
     )

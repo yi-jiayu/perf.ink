@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
 from django.db import models
 
 
@@ -21,7 +22,16 @@ class SplatnetSession(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class SalmonRunRotation(models.Model):
+    start_end_time = DateTimeRangeField()
+    stage = models.TextField()
+    weapons = ArrayField(models.TextField())
+
+
 class SalmonRunShiftSummaryRaw(models.Model):
+    rotation = models.ForeignKey(
+        SalmonRunRotation, null=True, on_delete=models.SET_NULL
+    )
     shift_id = models.TextField()
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     data = models.JSONField()
@@ -144,12 +154,6 @@ class SalmonRunShiftDetailRaw(models.Model):
         )
 
 
-# class SalmonRunRotation(models.Model):
-#     start_end_time = DateTimeRangeField()
-#     stage = models.TextField()
-#     weapons = ArrayField(models.TextField())
-#
-#
 # class SalmonRunShiftSummary(models.Model):
 #     rotation = models.ForeignKey(SalmonRunRotation, on_delete=models.CASCADE, null=True)
 #     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

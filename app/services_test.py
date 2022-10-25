@@ -1,52 +1,58 @@
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
+from django.utils import timezone
 
 from . import factories, models, services
 
 
-@pytest.mark.django_db
-def test_sync_salmon_run_shift_summaries(faker, django_assert_max_num_queries):
-    with patch("app.services.get_salmon_run_shifts") as get_salmon_run_shifts:
-        user = factories.UserFactory()
-        splatnet_shifts = [{"id": faker.uuid4()} for _ in range(10)]
-        get_salmon_run_shifts.return_value = splatnet_shifts
+@pytest.fixture
+def summary_groups(faker):
+    t0 = timezone.now()
+    t1 = t0 + timedelta(days=1)
+    t2 = t0 + timedelta(days=2)
+    return [
+        services.SummaryGroup(
+            start_end_time=(t0, t1),
+            stage="Gone Fission Hydroplant",
+            weapons=["Aerospray MG", "Carbon Roller", "Explosher", "Jet Squelcher"],
+            shifts=[{"id": faker.uuid4(), "type": "summary"} for _ in range(10)],
+        ),
+        services.SummaryGroup(
+            start_end_time=(t1, t2),
+            stage="Sockeye Station",
+            weapons=[
+                "Aerospray MG",
+                "Undercover Brella",
+                "Flingza Roller",
+                "Heavy Splatling",
+            ],
+            shifts=[{"id": faker.uuid4(), "type": "summary"} for _ in range(10)],
+        ),
+    ]
 
-        with django_assert_max_num_queries(10):
+
+@pytest.mark.django_db
+def test_sync_salmon_run_shift_summaries(
+    django_assert_max_num_queries,
+    summary_groups,
+):
+    user = factories.UserFactory()
+    with patch("app.services.get_summary_groups", return_value=summary_groups):
+        with django_assert_max_num_queries(19):  # 20 summaries to sync - 1
             services.sync_salmon_run_shift_summaries(user)
 
-        for shift in splatnet_shifts:
-            assert models.SalmonRunShiftSummaryRaw.objects.filter(
-                shift_id=shift["id"],
-                uploaded_by=user,
-                data=shift,
-            ).exists()
-
-
-@pytest.mark.django_db
-def test_sync_salmon_run_shift_summaries_only_new(faker, django_assert_max_num_queries):
-    with patch("app.services.get_salmon_run_shifts") as get_salmon_run_shifts:
-        user = factories.UserFactory()
-        splatnet_shifts = [{"id": faker.uuid4()} for _ in range(10)]
-        get_salmon_run_shifts.return_value = splatnet_shifts
-
-        # given that some shift summaries have already been synced
-        for shift in splatnet_shifts[:5]:
-            models.SalmonRunShiftSummaryRaw.objects.create(
-                shift_id=shift["id"],
-                uploaded_by=user,
-                data=shift,
+        for group in summary_groups:
+            rotation = models.SalmonRunRotation.objects.get(
+                start_end_time=group.start_end_time,
+                stage=group.stage,
+                weapons=group.weapons,
             )
-
-        with django_assert_max_num_queries(10):
-            summaries = services.sync_salmon_run_shift_summaries(user)
-
-        for shift in splatnet_shifts:
-            assert models.SalmonRunShiftSummaryRaw.objects.filter(
-                shift_id=shift["id"],
-                uploaded_by=user,
-                data=shift,
-            ).exists()
-
-        # then all the summaries should be returned, including those which were already synced
-        assert len(summaries) == 10
+            for shift in group.shifts:
+                assert models.SalmonRunShiftSummaryRaw.objects.filter(
+                    rotation=rotation,
+                    shift_id=shift["id"],
+                    uploaded_by=user,
+                    data=shift,
+                ).exists()
