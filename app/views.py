@@ -13,7 +13,7 @@ def shifts_index(request):
     summaries = list(
         models.SalmonRunShiftSummaryRaw.objects.filter(uploaded_by=request.user)
         .select_related("detail")
-        .order_by("-uploaded_at")[:50]
+        .order_by("-played_at")[:50]
     )
     highest_grade_points = max(
         (summary.grade_points for summary in summaries), default=0

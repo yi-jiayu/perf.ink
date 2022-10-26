@@ -36,6 +36,7 @@ class SalmonRunShiftSummaryRaw(models.Model):
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     data = models.JSONField()
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    played_at = models.DateTimeField()
 
     class Meta:
         constraints = [

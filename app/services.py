@@ -1,3 +1,4 @@
+import base64
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Callable, Concatenate, Iterable, ParamSpec, TypeVar
@@ -96,6 +97,11 @@ def get_summary_groups(bullet_token: str) -> list[SummaryGroup]:
     return list(group_salmon_run_jobs(data))
 
 
+def get_played_at_from_shift_id(shift_id: str) -> datetime:
+    decoded_shift_id = base64.standard_b64decode(shift_id).decode("utf-8")
+    return pendulum.parse(decoded_shift_id[41:56])
+
+
 @transaction.atomic
 def sync_salmon_run_shift_summaries(
     user: models.User,
@@ -118,6 +124,7 @@ def sync_salmon_run_shift_summaries(
                 shift_id=shift["id"],
                 uploaded_by=user,
                 data=shift,
+                played_at=get_played_at_from_shift_id(shift["id"]),
             )
             summaries.append(summary)
     summaries = models.SalmonRunShiftSummaryRaw.objects.bulk_create(

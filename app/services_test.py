@@ -1,15 +1,38 @@
-from datetime import timedelta
+import base64
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import pytest
-from django.utils import timezone
 
 from . import factories, models, services
 
 
+def test_get_played_at_from_shift_id():
+    shift_id = "Q29vcEhpc3RvcnlEZXRhaWwtdS1xb21pZm92dG5wanZjaGRndm5tbToyMDIyMTAyNFQwODM2NDhfMGJiNmQ5MDctMTBlMC00NTM0LTkxMzktNTRhMzlhYmVjNjg3"
+    got = services.get_played_at_from_shift_id(shift_id)
+    want = datetime(2022, 10, 24, 8, 36, 48, tzinfo=timezone.utc)
+    assert got == want
+
+
 @pytest.fixture
-def summary_groups(faker):
-    t0 = timezone.now()
+def generate_shift_id(faker):
+    def _generate_shift_id():
+        uuid = faker.uuid4()
+        played_at = faker.date_time(tzinfo=timezone.utc).strftime("%Y%m%dT%H%M%S")
+        decoded_shift_id = (
+            f"CoopHistoryDetail-u-qomifovtnpjvchdgvnmm:{played_at}_{uuid}"
+        )
+        shift_id = base64.standard_b64encode(decoded_shift_id.encode("utf-8")).decode(
+            "utf-8"
+        )
+        return shift_id
+
+    return _generate_shift_id
+
+
+@pytest.fixture
+def summary_groups(faker, generate_shift_id):
+    t0 = faker.date_time(tzinfo=timezone.utc)
     t1 = t0 + timedelta(days=1)
     t2 = t0 + timedelta(days=2)
     return [
@@ -17,7 +40,7 @@ def summary_groups(faker):
             start_end_time=(t0, t1),
             stage="Gone Fission Hydroplant",
             weapons=["Aerospray MG", "Carbon Roller", "Explosher", "Jet Squelcher"],
-            shifts=[{"id": faker.uuid4(), "type": "summary"} for _ in range(10)],
+            shifts=[{"id": generate_shift_id(), "type": "summary"} for _ in range(10)],
         ),
         services.SummaryGroup(
             start_end_time=(t1, t2),
@@ -28,7 +51,7 @@ def summary_groups(faker):
                 "Flingza Roller",
                 "Heavy Splatling",
             ],
-            shifts=[{"id": faker.uuid4(), "type": "summary"} for _ in range(10)],
+            shifts=[{"id": generate_shift_id(), "type": "summary"} for _ in range(10)],
         ),
     ]
 
@@ -55,4 +78,5 @@ def test_sync_salmon_run_shift_summaries(
                     shift_id=shift["id"],
                     uploaded_by=user,
                     data=shift,
+                    played_at=services.get_played_at_from_shift_id(shift["id"]),
                 ).exists()

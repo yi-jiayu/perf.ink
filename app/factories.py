@@ -1,3 +1,6 @@
+import base64
+from datetime import timezone
+
 import factory
 
 from . import models
@@ -20,8 +23,19 @@ class SalmonRunShiftSummaryRawFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.SalmonRunShiftSummaryRaw
 
-    shift_id = factory.Faker("uuid4")
+    played_at = factory.Faker("date_time", tzinfo=timezone.utc)
     data = factory.LazyAttribute(lambda self: {"id": self.shift_id})
+
+    @factory.lazy_attribute
+    def shift_id(self):
+        uuid = factory.Faker("uuid4")
+        played_at = self.played_at
+        decoded_shift_id = (
+            f"CoopHistoryDetail-u-qomifovtnpjvchdgvnmm:{played_at}_{uuid}"
+        )
+        return base64.standard_b64encode(decoded_shift_id.encode("utf-8")).decode(
+            "utf-8"
+        )
 
 
 class SalmonRunShiftDetailRawFactory(factory.django.DjangoModelFactory):
