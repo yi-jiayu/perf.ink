@@ -26,5 +26,6 @@ def special_weapon_icon(name: str):
         "Crab Tank": "crab_tank.png",
         "Booyah Bomb": "booyah_bomb.png",
         "Wave Breaker": "wave_breaker.png",
+        "Reefslider": "reefslider.png",
     }
     return icons[name]
