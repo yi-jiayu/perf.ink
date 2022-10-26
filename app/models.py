@@ -154,6 +154,14 @@ class SalmonRunShiftDetailRaw(models.Model):
             for result in self.data["data"]["coopHistoryDetail"]["memberResults"]
         )
 
+    @property
+    def waves(self):
+        return self.data["data"]["coopHistoryDetail"]["waveResults"]
+
+    @property
+    def king_salmonid(self):
+        return self.data["data"]["coopHistoryDetail"]["bossResult"]["boss"]["name"]
+
 
 # class SalmonRunShiftSummary(models.Model):
 #     rotation = models.ForeignKey(SalmonRunRotation, on_delete=models.CASCADE, null=True)
