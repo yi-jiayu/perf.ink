@@ -65,9 +65,18 @@
                 {% endfor %}
               </div>
             </section>
-            <div>
-              <h2>Bosses</h2>
-            </div>
+            <section>
+              <div class="flex flex-col gap-y-2 border-2 rounded-md border-gray-200 p-2">
+                {% for result in detail.enemy_results %}
+                  <div class="flex justify-between">
+                    <div>{{ result.enemy.name }}</div>
+                    <div>
+                      {{ result.teamDefeatCount }} ({{ result.defeatCount }}) / {{ result.popCount }}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </section>
           </div>
         {% endif %}
       </div>
