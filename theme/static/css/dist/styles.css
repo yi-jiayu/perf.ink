@@ -790,6 +790,10 @@ select {
   margin-bottom: 1rem;
 }
 
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
 .block {
   display: block;
 }
@@ -826,8 +830,12 @@ select {
   height: 1.5rem;
 }
 
-.w-24 {
-  width: 6rem;
+.h-4 {
+  height: 1rem;
+}
+
+.w-32 {
+  width: 8rem;
 }
 
 .max-w-7xl {
@@ -848,6 +856,10 @@ select {
 
 .flex-col {
   flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
 }
 
 .flex-nowrap {
@@ -872,6 +884,10 @@ select {
 
 .justify-between {
   justify-content: space-between;
+}
+
+.gap-1 {
+  gap: 0.25rem;
 }
 
 .gap-y-4 {
@@ -964,6 +980,16 @@ select {
 .py-2 {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+.px-0\.5 {
+  padding-left: 0.125rem;
+  padding-right: 0.125rem;
+}
+
+.px-0 {
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 .pb-4 {

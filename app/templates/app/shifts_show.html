@@ -1,5 +1,5 @@
 {% extends "app/base.html" %}
-{% load static %}
+{% load static app_extras %}
 
 {% block content %}
   <div class="pb-4">
@@ -23,15 +23,24 @@
             <section>
               <div class="flex gap-x-2 flex-nowrap overflow-x-auto">
                 {% for wave in detail.wave_results %}
-                  <div class="border-2 border-gray-200 rounded-md p-2 w-24 flex-none">
+                  <div class="border-2 border-gray-200 rounded-md p-2 w-32 flex-none">
                     <div class="flex flex-col justify-between">
                       <div>Wave {{ wave.waveNumber }}</div>
                       <div>{% if wave.deliverNorm %}{{ wave.teamDeliverCount }}/{{ wave.deliverNorm }}{% else %}
                         {{ detail.king_salmonid }}{% endif %}</div>
-                      <div>{% if wave.waterLevel == 0 %}Low tide{% elif wave.waterLevel == 1 %}Normal{% else %}High
-                        tide{% endif %}</div>
+                      <div>{% water_level_string wave.waterLevel %}</div>
                       <div>{{ wave.eventWave.name|default:"-" }}</div>
-                      <div><img src="{% static "golden_egg.svg" %}" class="h-6 inline"> x{{ wave.goldenPopCount }}
+                      <div>
+                        <img src="{% static "golden_egg.svg" %}" class="h-6 inline"> x{{ wave.goldenPopCount }}
+                      </div>
+                      <div class="flex flex-wrap justify-center gap-1 mt-1">
+                        {% for special_weapon in wave.specialWeapons %}
+                          {% with special_weapon.name|special_weapon_icon as icon %}
+                            <div class="bg-gray-200 rounded-md px-0.5">
+                              <img src="{% static icon %}" class="h-4">
+                            </div>
+                          {% endwith %}
+                        {% endfor %}
                       </div>
                     </div>
                   </div>
@@ -41,10 +50,16 @@
             <section>
               <div class="flex flex-col gap-y-2">
                 {% for result in detail.player_results %}
-                  <div class="border-2 border-gray-200 rounded-md bg-gray-200 p-2 flex justify-between">
+                  <div class="border-2 border-gray-200 rounded-md bg-gray-200 p-2 flex justify-between items-center">
                     <div>
                       <div class="font-bold">{{ result.player.name }}</div>
                       <div>Boss salmonids x{{ result.defeatEnemyCount }}</div>
+                      <div>
+                        {% with result.specialWeapon.name|special_weapon_icon as icon %}
+                          <div class="px-0.5"><img src="{% static icon %}" class="h-4 inline">
+                          </div>
+                        {% endwith %}
+                      </div>
                     </div>
                     <div class="grid grid-rows-2 grid-cols-2">
                       <div>
