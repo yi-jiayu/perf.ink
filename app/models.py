@@ -94,7 +94,7 @@ class SalmonRunShiftDetailRaw(models.Model):
     @property
     def golden_eggs_contributed_individual(self):
         return (
-            self.golden_eggs_delivered_individual + self.golden_eggs_assisted_individual
+                self.golden_eggs_delivered_individual + self.golden_eggs_assisted_individual
         )
 
     @property
@@ -155,13 +155,17 @@ class SalmonRunShiftDetailRaw(models.Model):
         )
 
     @property
-    def waves(self):
+    def wave_results(self):
         return self.data["data"]["coopHistoryDetail"]["waveResults"]
 
     @property
     def king_salmonid(self):
         return self.data["data"]["coopHistoryDetail"]["bossResult"]["boss"]["name"]
 
+    @property
+    def player_results(self):
+        return [self.data["data"]["coopHistoryDetail"]["myResult"]] + self.data["data"]["coopHistoryDetail"][
+            "memberResults"]
 
 # class SalmonRunShiftSummary(models.Model):
 #     rotation = models.ForeignKey(SalmonRunRotation, on_delete=models.CASCADE, null=True)

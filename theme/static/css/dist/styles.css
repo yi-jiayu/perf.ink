@@ -822,16 +822,12 @@ select {
   height: 4rem;
 }
 
-.h-8 {
-  height: 2rem;
+.h-6 {
+  height: 1.5rem;
 }
 
 .w-24 {
   width: 6rem;
-}
-
-.w-8 {
-  width: 2rem;
 }
 
 .max-w-7xl {
@@ -840,6 +836,14 @@ select {
 
 .flex-none {
   flex: none;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-rows-2 {
+  grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
 .flex-col {
