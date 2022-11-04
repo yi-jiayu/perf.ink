@@ -12,7 +12,7 @@ import typer
 logger = structlog.get_logger()
 
 nsoapp_version = "2.3.1"
-splatnet3_version = "1.0.0-216d0219"
+splatnet3_version = "1.0.0-5644e7a2"
 app_user_agent = "woomy_bot/2.0.0"
 browser_user_agent = (
     "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
