@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "tailwind",
     "theme",
+    "debug_toolbar",
     "django_browser_reload",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -70,6 +71,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
