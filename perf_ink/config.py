@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 from pydantic import BaseSettings
@@ -22,4 +23,5 @@ class Config(BaseSettings):
     server_email: str = ""
 
 
-config = Config(_env_file=".env", _env_file_encoding="utf-8")
+env_file_path = os.getenv("ENV_FILE", default=".env")
+config = Config(_env_file=env_file_path, _env_file_encoding="utf-8")
