@@ -9,24 +9,48 @@
     </header>
     <main>
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <dl>
-          <dt>Shifts worked (all time)</dt>
-          <dt>{{ all_time.shifts_worked }}</dt>
-          <dt>Average waves cleared (all time)</dt>
-          <dt>{{ all_time.average_waves_cleared|floatformat:1 }}</dt>
-          <dt>Most golden eggs delivered (team, all time)</dt>
-          <dt>{{ all_time.most_golden_eggs_delivered_team }}</dt>
-          <dt>Most golden eggs delivered (self, all time)</dt>
-          <dt>{{ all_time.most_golden_eggs_delivered_self }}</dt>
-          <dt>Shifts worked (latest rotation)</dt>
-          <dt>{{ latest_rotation.shifts_worked }}</dt>
-          <dt>Average waves cleared (latest rotation)</dt>
-          <dt>{{ latest_rotation.average_waves_cleared|floatformat:1 }}</dt>
-          <dt>Most golden eggs delivered (team, latest rotation)</dt>
-          <dt>{{ latest_rotation.most_golden_eggs_delivered_team }}</dt>
-          <dt>Most golden eggs delivered (self, latest rotation)</dt>
-          <dt>{{ latest_rotation.most_golden_eggs_delivered_self }}</dt>
-        </dl>
+        <section>
+          <h2>Shift stats</h2>
+          <dl>
+            <dt>Shifts worked (all time)</dt>
+            <dd>{{ all_time.shifts_worked }}</dd>
+            <dt>Average waves cleared (all time)</dt>
+            <dd>{{ all_time.average_waves_cleared|floatformat:1 }}</dd>
+            <dt>Most golden eggs delivered (all time, team)</dt>
+            <dd>{{ all_time.most_golden_eggs_delivered_team }}</dd>
+            <dt>Most golden eggs delivered (all time, self)</dt>
+            <dd>{{ all_time.most_golden_eggs_delivered_self }}</dd>
+            <dt>Shifts worked (latest rotation)</dt>
+            <dd>{{ latest_rotation.shifts_worked }}</dd>
+            <dt>Average waves cleared (latest rotation)</dt>
+            <dd>{{ latest_rotation.average_waves_cleared|floatformat:1 }}</dd>
+            <dt>Most golden eggs delivered (team, latest rotation)</dt>
+            <dd>{{ latest_rotation.most_golden_eggs_delivered_team }}</dd>
+            <dt>Most golden eggs delivered (self, latest rotation)</dt>
+            <dd>{{ latest_rotation.most_golden_eggs_delivered_self }}</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Wave stats</h2>
+          <section>
+            <h3>Waves cleared by water level</h3>
+            <dl>
+              {% for label, values in all_time.waves_cleared_by_water_level.items %}
+                <dt>{{ label }}</dt>
+                <dd>{{ values.0 }}/{{ values.1 }} ({{ values.2|floatformat:1 }}%)</dd>
+              {% endfor %}
+            </dl>
+          </section>
+          <section>
+            <h3>Waves cleared by event</h3>
+            <dl>
+              {% for label, values in all_time.waves_cleared_by_event.items %}
+                <dt>{{ label }}</dt>
+                <dd>{{ values.0 }}/{{ values.1 }} ({{ values.2|floatformat:1 }}%)</dd>
+              {% endfor %}
+            </dl>
+          </section>
+        </section>
       </div>
     </main>
   </div>

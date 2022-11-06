@@ -138,14 +138,20 @@ def statistics_index(request):
     shifts_all_time = models.SalmonRunShiftSummary.objects.filter(
         uploaded_by=request.user
     )
-    statistics_all_time = services.salmon_run_shift_statistics(shifts_all_time)
+    waves_all_time = models.SalmonRunWave.objects.all()
+    statistics_all_time = services.salmon_run_shift_statistics(
+        shifts_all_time, waves_all_time
+    )
 
     latest_rotation = models.SalmonRunShiftSummary.objects.latest("played_at").rotation
     shifts_latest_rotation = models.SalmonRunShiftSummary.objects.filter(
         uploaded_by=request.user, rotation=latest_rotation
     )
+    waves_latest_rotation = models.SalmonRunWave.objects.filter(
+        shift__rotation=latest_rotation
+    )
     statistics_latest_rotation = services.salmon_run_shift_statistics(
-        shifts_latest_rotation
+        shifts_latest_rotation, waves_latest_rotation
     )
 
     context = {

@@ -7,7 +7,7 @@ import httpx
 import pendulum
 import structlog
 from django.db import transaction
-from django.db.models import Avg, Max, QuerySet
+from django.db.models import Avg, Count, Max, QuerySet
 
 import splatnet
 
@@ -153,9 +153,14 @@ class SalmonRunShiftStatistics:
     average_waves_cleared: float
     most_golden_eggs_delivered_team: int
     most_golden_eggs_delivered_self: int
+    waves_cleared_by_water_level: dict[str, tuple[int, int, float]]
+    waves_cleared_by_event: dict[str, tuple[int, int, float]]
 
 
-def salmon_run_shift_statistics(shifts: QuerySet[models.SalmonRunShiftSummary]):
+def salmon_run_shift_statistics(
+    shifts: QuerySet[models.SalmonRunShiftSummary],
+    waves: QuerySet[models.SalmonRunWave],
+):
     shifts_worked = shifts.count()
     average_waves_cleared = shifts.aggregate(Avg("waves_cleared"))["waves_cleared__avg"]
     most_golden_eggs_delivered_team = shifts.aggregate(
@@ -164,11 +169,59 @@ def salmon_run_shift_statistics(shifts: QuerySet[models.SalmonRunShiftSummary]):
     most_golden_eggs_delivered_self = shifts.aggregate(
         Max("golden_eggs_delivered_self")
     )["golden_eggs_delivered_self__max"]
+    waves_cleared_by_water_level_denominator = dict(
+        waves.values("water_level")
+        .annotate(Count("water_level"))
+        .values_list("water_level", "water_level__count")
+    )
+    waves_cleared_by_water_level_numerator = dict(
+        waves.filter(cleared=True)
+        .values("water_level")
+        .annotate(Count("water_level"))
+        .values_list("water_level", "water_level__count")
+    )
+    waves_cleared_by_water_level = {}
+    water_level_labels = {
+        0: "Low",
+        1: "Normal",
+        2: "High",
+    }
+    for water_level, denominator in waves_cleared_by_water_level_denominator.items():
+        numerator = waves_cleared_by_water_level_numerator.get(water_level, 0)
+        waves_cleared_by_water_level[water_level_labels[water_level]] = (
+            numerator,
+            denominator,
+            100 * numerator / denominator,
+        )
+
+    waves_faced_by_event_denominator = dict(
+        waves.values("event")
+        .annotate(Count("event"))
+        .values_list("event", "event__count")
+    )
+    waves_cleared_by_event_numerator = dict(
+        waves.filter(cleared=True)
+        .values("event")
+        .annotate(Count("event"))
+        .values_list("event", "event__count")
+    )
+    waves_cleared_by_event = {}
+    for event, denominator in waves_faced_by_event_denominator.items():
+        numerator = waves_cleared_by_event_numerator.get(event, 0)
+        event_label = event if event else "None"
+        waves_cleared_by_event[event_label] = (
+            numerator,
+            denominator,
+            100 * numerator / denominator,
+        )
+
     return SalmonRunShiftStatistics(
         shifts_worked=shifts_worked,
         average_waves_cleared=average_waves_cleared,
         most_golden_eggs_delivered_team=most_golden_eggs_delivered_team,
         most_golden_eggs_delivered_self=most_golden_eggs_delivered_self,
+        waves_cleared_by_water_level=waves_cleared_by_water_level,
+        waves_cleared_by_event=waves_cleared_by_event,
     )
 
 
