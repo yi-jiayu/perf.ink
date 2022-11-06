@@ -8,3 +8,6 @@ __pycache__
 
 # Django static root
 www
+
+# Code coverage output
+.coverage

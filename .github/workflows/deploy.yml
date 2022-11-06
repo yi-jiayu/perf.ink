@@ -41,7 +41,7 @@ jobs:
       - name: Run tests
         run: |
           cp template.env .env
-          poetry run pytest
+          poetry run pytest --cov
 
   deploy:
     needs: test
