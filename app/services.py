@@ -106,7 +106,7 @@ def get_played_at_from_shift_id(shift_id: str) -> datetime:
 @transaction.atomic
 def sync_salmon_run_shift_summaries(
     user: models.User,
-) -> list[models.SalmonRunShiftSummaryRaw]:
+) -> list[models.SalmonRunShiftSummary]:
     groups = get_summary_groups(user)
     raw_summaries = []
     summaries = []
@@ -136,10 +136,9 @@ def sync_salmon_run_shift_summaries(
     models.SalmonRunShiftSummaryRaw.objects.bulk_create(
         raw_summaries, ignore_conflicts=True
     )
-    summaries = models.SalmonRunShiftSummary.objects.bulk_create(
+    return models.SalmonRunShiftSummary.objects.bulk_create(
         summaries, ignore_conflicts=True
     )
-    return summaries
 
 
 @with_bullet_token
@@ -171,3 +170,38 @@ def salmon_run_shift_statistics(shifts: QuerySet[models.SalmonRunShiftSummary]):
         most_golden_eggs_delivered_team=most_golden_eggs_delivered_team,
         most_golden_eggs_delivered_self=most_golden_eggs_delivered_self,
     )
+
+
+@transaction.atomic
+def update_shift_with_details(
+    shift: models.SalmonRunShiftSummary,
+    details: dict,
+):
+    if not details["data"]["coopHistoryDetail"]:
+        # return if there is no coopHistoryDetail (e.g. when we try to fetch
+        # details for a shift that is too old)
+        return
+
+    # load shift details
+    models.SalmonRunShiftDetail.objects.create(
+        summary=shift,
+        hazard_level=details["data"]["coopHistoryDetail"]["dangerRate"] * 100,
+        smell_meter=details["data"]["coopHistoryDetail"]["smellMeter"],
+    )
+
+    # load player results
+    own_result = models.SalmonRunShiftPlayer.from_raw(
+        shift, details["data"]["coopHistoryDetail"]["myResult"]
+    )
+    teammate_results = [
+        models.SalmonRunShiftPlayer.from_raw(shift, result)
+        for result in details["data"]["coopHistoryDetail"]["memberResults"]
+    ]
+    models.SalmonRunShiftPlayer.objects.bulk_create([own_result] + teammate_results)
+
+    # load wave results
+    wave_results = [
+        models.SalmonRunWave.from_raw(shift, wave)
+        for wave in details["data"]["coopHistoryDetail"]["waveResults"]
+    ]
+    models.SalmonRunWave.objects.bulk_create(wave_results)

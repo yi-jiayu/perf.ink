@@ -16,8 +16,10 @@ def sync_salmon_run_shift_details(user_id: int, shift_ids: list[str]) -> None:
 
     for shift_id in shift_ids:
         with transaction.atomic():
-            summary = models.SalmonRunShiftSummaryRaw.objects.select_for_update().get(
-                uploaded_by=user, shift_id=shift_id
+            summary_raw = (
+                models.SalmonRunShiftSummaryRaw.objects.select_for_update().get(
+                    uploaded_by=user, shift_id=shift_id
+                )
             )
             if models.SalmonRunShiftDetailRaw.objects.filter(
                 uploaded_by=user, shift_id=shift_id
@@ -25,15 +27,19 @@ def sync_salmon_run_shift_details(user_id: int, shift_ids: list[str]) -> None:
                 log.info(
                     "skipping already-synced shift detail",
                     user_id=user_id,
-                    shift_id=summary.shift_id,
+                    shift_id=summary_raw.shift_id,
                 )
             else:
-                data = services.get_salmon_run_shift_detail(user, summary.shift_id)
+                data = services.get_salmon_run_shift_detail(user, summary_raw.shift_id)
                 models.SalmonRunShiftDetailRaw.objects.create(
-                    summary=summary,
-                    shift_id=summary.shift_id,
+                    summary=summary_raw,
+                    shift_id=summary_raw.shift_id,
                     uploaded_by=user,
                     data=data,
                 )
-                log.info("synced shift detail", shift_id=summary.shift_id)
+                summary = models.SalmonRunShiftSummary.objects.get(
+                    uploaded_by=user, splatnet_id=summary_raw.shift_id
+                )
+                services.update_shift_with_details(summary, data)
+                log.info("synced shift detail", shift_id=summary_raw.shift_id)
     log.info("synced shift details", count=len(shift_ids))

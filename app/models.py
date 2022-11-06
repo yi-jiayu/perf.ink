@@ -1,4 +1,6 @@
 import base64
+from functools import cached_property
+from typing import Optional
 
 import pendulum
 from django.conf import settings
@@ -251,23 +253,130 @@ class SalmonRunShiftSummary(models.Model):
     def from_raw(cls, user: User, rotation: SalmonRunRotation, raw: dict):
         return cls(**cls._from_raw(user, rotation, raw))
 
+    @cached_property
+    def squad(self):
+        return list(self.players.all())
 
-# class SalmonRunShiftDetail(models.Model):
-#     summary = models.OneToOneField(SalmonRunShiftSummary, on_delete=models.CASCADE)
-#
-#     hazard_level = models.FloatField()
-#
-#
-# class SalmonRunWave(models.Model):
-#     detail = models.ForeignKey(
-#         SalmonRunShiftDetail, on_delete=models.CASCADE, related_name="waves"
-#     )
-#
-#     number = models.IntegerField()
-#     cleared = models.BooleanField()
-#     water_level = models.TextField()
-#     event = models.TextField()
-#     golden_egg_quota = models.IntegerField()
-#     golden_eggs_delivered = models.IntegerField()
-#     power_eggs_delivered = models.IntegerField()
-#     specials_used = ArrayField(models.TextField())
+    @cached_property
+    def own_result(self) -> Optional["SalmonRunShiftPlayer"]:
+        for player in self.squad:
+            if player.is_uploader:
+                return player
+        return None
+
+
+class SalmonRunShiftDetail(models.Model):
+    summary = models.OneToOneField(
+        SalmonRunShiftSummary, on_delete=models.CASCADE, related_name="detail"
+    )
+
+    hazard_level = models.FloatField()
+    smell_meter = models.IntegerField()
+
+
+class SalmonRunShiftPlayer(models.Model):
+    shift = models.ForeignKey(
+        SalmonRunShiftSummary, on_delete=models.CASCADE, related_name="players"
+    )
+
+    splatnet_id = models.TextField()
+    is_uploader = models.BooleanField()
+    bosses_defeated = models.IntegerField()
+    golden_eggs_delivered = models.IntegerField()
+    golden_eggs_assisted = models.IntegerField()
+    power_eggs_delivered = models.IntegerField()
+    teammates_rescued = models.IntegerField()
+    times_rescued = models.IntegerField()
+    special_weapon = models.TextField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["shift", "splatnet_id"],
+                name="salmonrunshiftplayer_unique",
+            ),
+        ]
+
+    @staticmethod
+    def _from_raw(shift: SalmonRunShiftSummary, raw: dict) -> dict:
+        return {
+            "shift": shift,
+            "splatnet_id": raw["player"]["id"],
+            "is_uploader": raw["player"]["isMyself"],
+            "bosses_defeated": raw["defeatEnemyCount"],
+            "golden_eggs_delivered": raw["goldenDeliverCount"],
+            "golden_eggs_assisted": raw["goldenAssistCount"],
+            "power_eggs_delivered": raw["deliverCount"],
+            "teammates_rescued": raw["rescueCount"],
+            "times_rescued": raw["rescuedCount"],
+            "special_weapon": raw["specialWeapon"]["name"]
+            if raw["specialWeapon"]
+            else "",
+        }
+
+    @classmethod
+    def from_raw(cls, shift: SalmonRunShiftSummary, raw: dict):
+        return cls(**cls._from_raw(shift, raw))
+
+    def defeated_most_bosses(self):
+        return all(
+            self.bosses_defeated >= member.bosses_defeated
+            for member in self.shift.squad
+        )
+
+    @property
+    def golden_eggs_contributed(self):
+        return self.golden_eggs_delivered + self.golden_eggs_assisted
+
+    def contributed_most_golden_eggs(self):
+        return all(
+            self.golden_eggs_contributed >= member.golden_eggs_contributed
+            for member in self.shift.squad
+        )
+
+
+class SalmonRunWave(models.Model):
+    shift = models.ForeignKey(
+        SalmonRunShiftSummary, on_delete=models.CASCADE, related_name="waves"
+    )
+
+    number = models.IntegerField()
+    cleared = models.BooleanField()
+    water_level = models.IntegerField()
+    event = models.TextField()
+    golden_egg_quota = models.IntegerField()
+    golden_eggs_delivered = models.IntegerField()
+    specials_used = ArrayField(models.TextField())
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["shift", "number"],
+                name="salmonrunwave_unique",
+            ),
+        ]
+
+    @staticmethod
+    def _from_raw(shift: SalmonRunShiftSummary, raw: dict) -> dict:
+        if raw["waveNumber"] == 4:
+            # king salmonid wave
+            cleared = shift.king_salmonid_defeated
+        else:
+            # normal wave
+            cleared = raw["waveNumber"] <= shift.waves_cleared
+        return {
+            "shift": shift,
+            "number": raw["waveNumber"],
+            "cleared": cleared,
+            "water_level": raw["waterLevel"],
+            "event": raw["eventWave"]["name"] if raw["eventWave"] else "",
+            "golden_egg_quota": raw["deliverNorm"] if raw["deliverNorm"] else -1,
+            "golden_eggs_delivered": raw["teamDeliverCount"]
+            if raw["teamDeliverCount"]
+            else -1,
+            "specials_used": [special["name"] for special in raw["specialWeapons"]],
+        }
+
+    @classmethod
+    def from_raw(cls, shift: SalmonRunShiftSummary, raw: dict):
+        return cls(**cls._from_raw(shift, raw))

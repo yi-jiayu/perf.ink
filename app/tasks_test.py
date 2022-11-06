@@ -1,5 +1,5 @@
 import multiprocessing
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pytest
 
@@ -9,30 +9,46 @@ from . import factories, models, tasks
 @pytest.mark.django_db
 def test_sync_salmon_run_shift_details():
     user = factories.UserFactory()
-    summaries = factories.SalmonRunShiftSummaryRawFactory.create_batch(
+    raw_summaries = factories.SalmonRunShiftSummaryRawFactory.create_batch(
         10, uploaded_by=user
     )
+    summaries = [
+        factories.SalmonRunShiftSummaryFactory(
+            uploaded_by=user, splatnet_id=raw_summary.shift_id
+        )
+        for raw_summary in raw_summaries
+    ]
 
     # given that some shift details have already been synced
+    for raw_summary in raw_summaries[:5]:
+        factories.SalmonRunShiftDetailRawFactory(summary=raw_summary)
     for summary in summaries[:5]:
-        factories.SalmonRunShiftDetailRawFactory(summary=summary)
+        factories.SalmonRunShiftDetailFactory(summary=summary)
 
-    def get_salmon_run_shift_detail(user, shift_id):
-        return {"id": shift_id, "detail": True}
+    splatnet_shift_details = [
+        {"id": raw_summary.shift_id, "type": "detail"}
+        for raw_summary in raw_summaries[5:]
+    ]
 
     with patch(
         "app.services.get_salmon_run_shift_detail",
-        side_effect=get_salmon_run_shift_detail,
-    ):
+        side_effect=splatnet_shift_details,
+    ), patch("app.services.update_shift_with_details") as update_shift_with_details:
         tasks.sync_salmon_run_shift_details(
-            user.id, [summary.shift_id for summary in summaries]
+            user.id, [summary.shift_id for summary in raw_summaries]
         )
 
-    for summary in summaries:
+    update_shift_with_details.assert_has_calls(
+        [
+            call(summary, detail)
+            for summary, detail in zip(summaries[5:], splatnet_shift_details[5:])
+        ]
+    )
+    for raw_summary in raw_summaries[5:]:
         assert models.SalmonRunShiftDetailRaw.objects.filter(
-            shift_id=summary.shift_id,
+            shift_id=raw_summary.shift_id,
             uploaded_by=user,
-            data={"id": summary.shift_id, "detail": True},
+            data={"id": raw_summary.shift_id, "type": "detail"},
         ).exists()
 
 

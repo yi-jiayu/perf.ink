@@ -59,3 +59,34 @@ class SalmonRunRotationFactory(factory.django.DjangoModelFactory):
         "Bloblobber",
         ".96 Gal",
     ]
+
+
+class SalmonRunShiftSummaryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.SalmonRunShiftSummary
+
+    splatnet_id = factory.Faker("uuid4")
+    uploaded_by = factory.SubFactory(UserFactory)
+
+    rotation = factory.SubFactory(SalmonRunRotationFactory)
+
+    played_at = factory.Faker("date_time", tzinfo=timezone.utc)
+    waves_cleared = 1
+    grade = "Eggsecutive VP"
+    grade_points = "200"
+    grade_point_diff = "KEEP"
+    golden_eggs_delivered_team = 20
+    power_eggs_delivered_team = 200
+    golden_eggs_delivered_self = 10
+    power_eggs_delivered_self = 100
+    king_salmonid = ""
+    king_salmonid_defeated = False
+
+
+class SalmonRunShiftDetailFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.SalmonRunShiftDetail
+
+    summary = factory.SubFactory(SalmonRunShiftSummaryFactory)
+    hazard_level = 120.0
+    smell_meter = 3

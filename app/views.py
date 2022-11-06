@@ -11,8 +11,9 @@ from . import forms, models, services, tasks
 @login_required
 def shifts_index(request):
     summaries = list(
-        models.SalmonRunShiftSummaryRaw.objects.filter(uploaded_by=request.user)
+        models.SalmonRunShiftSummary.objects.filter(uploaded_by=request.user)
         .select_related("detail")
+        .prefetch_related("players")
         .order_by("-played_at")[:50]
     )
     highest_grade_points = max(
@@ -118,10 +119,11 @@ def nintendo_session(request):
 
 @login_required
 def salmon_run_sync(request):
-    summaries = services.sync_salmon_run_shift_summaries(request.user)
-    tasks.sync_salmon_run_shift_details.delay(
-        request.user.id, [summary.splatnet_id for summary in summaries]
-    )
+    if request.method == "POST":
+        summaries = services.sync_salmon_run_shift_summaries(request.user)
+        tasks.sync_salmon_run_shift_details.delay(
+            request.user.id, [summary.splatnet_id for summary in summaries]
+        )
     return redirect("shifts_index")
 
 
