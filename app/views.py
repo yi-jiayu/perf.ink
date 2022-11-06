@@ -150,7 +150,7 @@ def nintendo_session(request):
 def salmon_run_sync(request):
     summaries = services.sync_salmon_run_shift_summaries(request.user)
     tasks.sync_salmon_run_shift_details.delay(
-        request.user.id, [summary.shift_id for summary in summaries]
+        request.user.id, [summary.splatnet_id for summary in summaries]
     )
     return redirect("shifts_index")
 
