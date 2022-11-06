@@ -4,6 +4,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 import splatnet
+
 from . import forms, models, services, tasks
 
 
@@ -70,40 +71,9 @@ def profile(request):
     except models.SplatnetSession.DoesNotExist:
         splatnet_session = None
 
-    shifts = []
-    summaries = list(
-        models.SalmonRunShiftSummaryRaw.objects.filter(
-            uploaded_by=request.user
-        ).order_by("-uploaded_at")[:50]
-    )
-    details = {
-        detail.shift_id: detail
-        for detail in models.SalmonRunShiftDetailRaw.objects.filter(
-            shift_id__in=[summary.shift_id for summary in summaries]
-        )
-    }
-    for summary in summaries:
-        data = {
-            "id": summary.data["id"],
-            "rank": summary.data["afterGrade"]["name"],
-            "points": summary.data["afterGradePoint"],
-            "change": summary.data["gradePointDiff"],
-        }
-        if detail := details.get(summary.shift_id):
-            data["detail"] = {
-                "hazard_level": detail.hazard_level,
-                "boss_count_individual": detail.boss_count_individual,
-                "boss_count_team": detail.boss_count_team,
-                "boss_count_percent": detail.boss_count_percent,
-                "rescued_count_individual": detail.rescued_count_individual,
-                "rescued_count_team": detail.rescued_count_team,
-            }
-        shifts.append(data)
-
     context = {
         "nintendo_session_form": nintendo_session_form,
         "splatnet_session": splatnet_session,
-        "shifts": shifts,
     }
     return render(request, "app/profile.html", context)
 
