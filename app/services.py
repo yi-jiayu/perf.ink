@@ -107,6 +107,7 @@ def sync_salmon_run_shift_summaries(
     user: models.User,
 ) -> list[models.SalmonRunShiftSummaryRaw]:
     groups = get_summary_groups(user)
+    raw_summaries = []
     summaries = []
     # reverse groups to get oldest first
     for group in reversed(groups):
@@ -119,15 +120,22 @@ def sync_salmon_run_shift_summaries(
         )
         # reverse shifts to get oldest first
         for shift in reversed(group.shifts):
-            summary = models.SalmonRunShiftSummaryRaw(
+            raw_summary = models.SalmonRunShiftSummaryRaw(
                 rotation=rotation,
                 shift_id=shift["id"],
                 uploaded_by=user,
                 data=shift,
                 played_at=get_played_at_from_shift_id(shift["id"]),
             )
+            raw_summaries.append(raw_summary)
+
+            summary = models.SalmonRunShiftSummary.from_raw(user, rotation, shift)
             summaries.append(summary)
-    summaries = models.SalmonRunShiftSummaryRaw.objects.bulk_create(
+
+    models.SalmonRunShiftSummaryRaw.objects.bulk_create(
+        raw_summaries, ignore_conflicts=True
+    )
+    summaries = models.SalmonRunShiftSummary.objects.bulk_create(
         summaries, ignore_conflicts=True
     )
     return summaries

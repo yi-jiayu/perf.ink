@@ -1,3 +1,6 @@
+import base64
+
+import pendulum
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField, DateTimeRangeField
@@ -173,31 +176,98 @@ class SalmonRunShiftDetailRaw(models.Model):
         return self.data["data"]["coopHistoryDetail"]["enemyResults"]
 
 
-# class SalmonRunShiftSummary(models.Model):
-#     rotation = models.ForeignKey(SalmonRunRotation, on_delete=models.CASCADE, null=True)
-#     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-#     raw = models.ForeignKey(SalmonRunShiftSummaryRaw, on_delete=models.CASCADE)
-#
-#     grade = models.TextField()
-#     grade_points = models.IntegerField()
-#     change = models.TextField()
-#
-#
+result_wave_to_waves_cleared = {
+    -1: -1,
+    0: 3,
+    1: 0,
+    2: 1,
+    3: 2,
+}
+
+
+class SalmonRunShiftSummary(models.Model):
+    # candidate key
+    splatnet_id = models.TextField()
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    # supplementary information
+    rotation = models.ForeignKey(SalmonRunRotation, on_delete=models.CASCADE, null=True)
+
+    # extracted fields
+    played_at = models.DateTimeField()
+    waves_cleared = models.IntegerField()
+    grade = models.TextField()
+    grade_points = models.IntegerField()
+    grade_point_diff = models.TextField()
+    golden_eggs_delivered_team = models.IntegerField()
+    power_eggs_delivered_team = models.IntegerField()
+    golden_eggs_delivered_self = models.IntegerField()
+    power_eggs_delivered_self = models.IntegerField()
+    king_salmonid = models.TextField()
+    king_salmonid_defeated = models.BooleanField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["splatnet_id", "uploaded_by"],
+                name="salmonrunshiftsummary_unique",
+            ),
+        ]
+
+    @staticmethod
+    def _from_raw(user: User, rotation: SalmonRunRotation, raw: dict) -> dict:
+        splatnet_id = raw["id"]
+        decoded_splatnet_id = base64.standard_b64decode(splatnet_id).decode("utf-8")
+        played_at = pendulum.parse(decoded_splatnet_id[41:56])
+
+        golden_eggs_delivered_team = raw["myResult"]["goldenDeliverCount"] + sum(
+            teammate["goldenDeliverCount"] for teammate in raw["memberResults"]
+        )
+        power_eggs_delivered_team = raw["myResult"]["deliverCount"] + sum(
+            teammate["deliverCount"] for teammate in raw["memberResults"]
+        )
+        king_salmonid = raw["bossResult"]["boss"]["name"] if raw["bossResult"] else ""
+        king_salmonid_defeated = (
+            raw["bossResult"]["hasDefeatBoss"] if raw["bossResult"] else False
+        )
+        return dict(
+            rotation=rotation,
+            uploaded_by=user,
+            played_at=played_at,
+            splatnet_id=splatnet_id,
+            waves_cleared=result_wave_to_waves_cleared[raw["resultWave"]],
+            grade=raw["afterGrade"]["name"],
+            grade_points=raw["afterGradePoint"],
+            grade_point_diff=raw["gradePointDiff"],
+            golden_eggs_delivered_team=golden_eggs_delivered_team,
+            power_eggs_delivered_team=power_eggs_delivered_team,
+            golden_eggs_delivered_self=raw["myResult"]["goldenDeliverCount"],
+            power_eggs_delivered_self=raw["myResult"]["deliverCount"],
+            king_salmonid=king_salmonid,
+            king_salmonid_defeated=king_salmonid_defeated,
+        )
+
+    @classmethod
+    def from_raw(cls, user: User, rotation: SalmonRunRotation, raw: dict):
+        return cls(**cls._from_raw(user, rotation, raw))
+
+
 # class SalmonRunShiftDetail(models.Model):
 #     summary = models.OneToOneField(SalmonRunShiftSummary, on_delete=models.CASCADE)
-#     raw = models.ForeignKey(SalmonRunShiftDetailRaw, on_delete=models.CASCADE)
 #
 #     hazard_level = models.FloatField()
 #
 #
 # class SalmonRunWave(models.Model):
-#     shift = models.ForeignKey(SalmonRunShiftDetail, on_delete=models.CASCADE)
+#     detail = models.ForeignKey(
+#         SalmonRunShiftDetail, on_delete=models.CASCADE, related_name="waves"
+#     )
 #
 #     number = models.IntegerField()
 #     cleared = models.BooleanField()
-#     tide = models.TextField()
+#     water_level = models.TextField()
 #     event = models.TextField()
-#     quota = models.IntegerField()
-#     delivered = models.IntegerField()
-#     power_eggs = models.IntegerField()
+#     golden_egg_quota = models.IntegerField()
+#     golden_eggs_delivered = models.IntegerField()
+#     power_eggs_delivered = models.IntegerField()
 #     specials_used = ArrayField(models.TextField())

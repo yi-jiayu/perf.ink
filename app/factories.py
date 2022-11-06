@@ -1,5 +1,5 @@
 import base64
-from datetime import timezone
+from datetime import datetime, timezone
 
 import factory
 
@@ -45,3 +45,17 @@ class SalmonRunShiftDetailRawFactory(factory.django.DjangoModelFactory):
     shift_id = factory.LazyAttribute(lambda self: self.summary.shift_id)
     data = factory.LazyAttribute(lambda self: {"id": self.shift_id, "detail": True})
     uploaded_by = factory.LazyAttribute(lambda self: self.summary.uploaded_by)
+
+
+class SalmonRunRotationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.SalmonRunRotation
+
+    start_end_time = (datetime(2022, 9, 30), datetime(2022, 10, 1, 16))
+    stage = "Gone Fission Hydroplant"
+    weapons = [
+        "Splash-o-matic",
+        "Octobrush",
+        "Bloblobber",
+        ".96 Gal",
+    ]

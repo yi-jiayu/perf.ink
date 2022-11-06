@@ -1,4 +1,3 @@
-import base64
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
@@ -15,23 +14,7 @@ def test_get_played_at_from_shift_id():
 
 
 @pytest.fixture
-def generate_shift_id(faker):
-    def _generate_shift_id():
-        uuid = faker.uuid4()
-        played_at = faker.date_time(tzinfo=timezone.utc).strftime("%Y%m%dT%H%M%S")
-        decoded_shift_id = (
-            f"CoopHistoryDetail-u-qomifovtnpjvchdgvnmm:{played_at}_{uuid}"
-        )
-        shift_id = base64.standard_b64encode(decoded_shift_id.encode("utf-8")).decode(
-            "utf-8"
-        )
-        return shift_id
-
-    return _generate_shift_id
-
-
-@pytest.fixture
-def summary_groups(faker, generate_shift_id):
+def summary_groups(faker, raw_salmon_run_shift_factory):
     t0 = faker.date_time(tzinfo=timezone.utc)
     t1 = t0 + timedelta(days=1)
     t2 = t0 + timedelta(days=2)
@@ -40,7 +23,7 @@ def summary_groups(faker, generate_shift_id):
             start_end_time=(t0, t1),
             stage="Gone Fission Hydroplant",
             weapons=["Aerospray MG", "Carbon Roller", "Explosher", "Jet Squelcher"],
-            shifts=[{"id": generate_shift_id(), "type": "summary"} for _ in range(10)],
+            shifts=[raw_salmon_run_shift_factory() for _ in range(10)],
         ),
         services.SummaryGroup(
             start_end_time=(t1, t2),
@@ -51,7 +34,7 @@ def summary_groups(faker, generate_shift_id):
                 "Flingza Roller",
                 "Heavy Splatling",
             ],
-            shifts=[{"id": generate_shift_id(), "type": "summary"} for _ in range(10)],
+            shifts=[raw_salmon_run_shift_factory() for _ in range(10)],
         ),
     ]
 
@@ -78,5 +61,12 @@ def test_sync_salmon_run_shift_summaries(
                     shift_id=shift["id"],
                     uploaded_by=user,
                     data=shift,
+                    played_at=services.get_played_at_from_shift_id(shift["id"]),
+                ).exists()
+
+                assert models.SalmonRunShiftSummary.objects.filter(
+                    rotation=rotation,
+                    splatnet_id=shift["id"],
+                    uploaded_by=user,
                     played_at=services.get_played_at_from_shift_id(shift["id"]),
                 ).exists()
