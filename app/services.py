@@ -7,6 +7,7 @@ import httpx
 import pendulum
 import structlog
 from django.db import transaction
+from django.db.models import Avg, Max, QuerySet
 
 import splatnet
 
@@ -145,3 +146,28 @@ def sync_salmon_run_shift_summaries(
 def get_salmon_run_shift_detail(bullet_token: str, shift_id: str) -> dict:
     with httpx.Client() as client:
         return splatnet.get_salmon_run_job_detail(client, bullet_token, shift_id)
+
+
+@dataclass
+class SalmonRunShiftStatistics:
+    shifts_worked: int
+    average_waves_cleared: float
+    most_golden_eggs_delivered_team: int
+    most_golden_eggs_delivered_self: int
+
+
+def salmon_run_shift_statistics(shifts: QuerySet[models.SalmonRunShiftSummary]):
+    shifts_worked = shifts.count()
+    average_waves_cleared = shifts.aggregate(Avg("waves_cleared"))["waves_cleared__avg"]
+    most_golden_eggs_delivered_team = shifts.aggregate(
+        Max("golden_eggs_delivered_team")
+    )["golden_eggs_delivered_team__max"]
+    most_golden_eggs_delivered_self = shifts.aggregate(
+        Max("golden_eggs_delivered_self")
+    )["golden_eggs_delivered_self__max"]
+    return SalmonRunShiftStatistics(
+        shifts_worked=shifts_worked,
+        average_waves_cleared=average_waves_cleared,
+        most_golden_eggs_delivered_team=most_golden_eggs_delivered_team,
+        most_golden_eggs_delivered_self=most_golden_eggs_delivered_self,
+    )

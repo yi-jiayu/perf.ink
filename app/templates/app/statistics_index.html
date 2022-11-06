@@ -10,8 +10,22 @@
     <main>
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <dl>
-          <dt>Shifts uploaded</dt>
-          <dt>{{ shifts_uploaded }}</dt>
+          <dt>Shifts worked (all time)</dt>
+          <dt>{{ all_time.shifts_worked }}</dt>
+          <dt>Average waves cleared (all time)</dt>
+          <dt>{{ all_time.average_waves_cleared|floatformat:1 }}</dt>
+          <dt>Most golden eggs delivered (team, all time)</dt>
+          <dt>{{ all_time.most_golden_eggs_delivered_team }}</dt>
+          <dt>Most golden eggs delivered (self, all time)</dt>
+          <dt>{{ all_time.most_golden_eggs_delivered_self }}</dt>
+          <dt>Shifts worked (latest rotation)</dt>
+          <dt>{{ latest_rotation.shifts_worked }}</dt>
+          <dt>Average waves cleared (latest rotation)</dt>
+          <dt>{{ latest_rotation.average_waves_cleared|floatformat:1 }}</dt>
+          <dt>Most golden eggs delivered (team, latest rotation)</dt>
+          <dt>{{ latest_rotation.most_golden_eggs_delivered_team }}</dt>
+          <dt>Most golden eggs delivered (self, latest rotation)</dt>
+          <dt>{{ latest_rotation.most_golden_eggs_delivered_self }}</dt>
         </dl>
       </div>
     </main>

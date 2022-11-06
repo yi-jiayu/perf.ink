@@ -4,7 +4,6 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 import splatnet
-
 from . import forms, models, services, tasks
 
 
@@ -164,8 +163,21 @@ def salmon_run_shift_detail(request, shift_id: str):
 
 @login_required
 def statistics_index(request):
-    shifts_uploaded = models.SalmonRunShiftSummaryRaw.objects.filter(
+    shifts_all_time = models.SalmonRunShiftSummary.objects.filter(
         uploaded_by=request.user
-    ).count()
-    context = {"shifts_uploaded": shifts_uploaded}
+    )
+    statistics_all_time = services.salmon_run_shift_statistics(shifts_all_time)
+
+    latest_rotation = models.SalmonRunShiftSummary.objects.latest("played_at").rotation
+    shifts_latest_rotation = models.SalmonRunShiftSummary.objects.filter(
+        uploaded_by=request.user, rotation=latest_rotation
+    )
+    statistics_latest_rotation = services.salmon_run_shift_statistics(
+        shifts_latest_rotation
+    )
+
+    context = {
+        "all_time": statistics_all_time,
+        "latest_rotation": statistics_latest_rotation,
+    }
     return render(request, "app/statistics_index.html", context)
