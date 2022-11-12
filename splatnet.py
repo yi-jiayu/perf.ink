@@ -53,7 +53,6 @@ def request_session_token(client):
         "session_token_code_challenge_method": "S256",
         "theme": "login_form",
     }
-    print(params)
 
     response = client.get(
         url="https://accounts.nintendo.com/connect/1.0.0/authorize",
@@ -294,10 +293,8 @@ def main(
     with httpx.Client(**client_args) as client:
         if not session_token_file:
             verifier, sign_in_url = request_session_token(client)
-            print(sign_in_url)
             session_token_url = input("Session token URL: ")
             session_token = get_session_token(client, session_token_url, verifier)
-            print(session_token)
         else:
             session_token = session_token_file.read()
         nintendo_token = _get_nintendo_token(client, session_token)
