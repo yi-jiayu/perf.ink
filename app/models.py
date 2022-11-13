@@ -193,7 +193,9 @@ class SalmonRunShiftSummary(models.Model):
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     # supplementary information
-    rotation = models.ForeignKey(SalmonRunRotation, on_delete=models.CASCADE, null=True)
+    rotation = models.ForeignKey(
+        SalmonRunRotation, on_delete=models.CASCADE, null=True, related_name="shifts"
+    )
 
     # extracted fields
     played_at = models.DateTimeField()

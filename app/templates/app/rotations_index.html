@@ -1,0 +1,44 @@
+{% extends "app/base.html" %}
+{% load tz %}
+
+{% block content %}
+  <div class="pb-4 grid gap-y-4">
+    <header>
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold leading-tight tracking-tight text-gray-800">Rotations</h1>
+      </div>
+    </header>
+    <main>
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-y-4">
+          {% for rotation in rotations %}
+            <div class="px-4 py-2 border-2 border-gray-200 rounded-md">
+              <h2 class="text-xl text-gray-800">{{ rotation.stage }}</h2>
+              <div>
+                {% timezone "Asia/Singapore" %}
+                  {{ rotation.start_end_time.lower|date:"l, F j Y, g A" }} to
+                  {{ rotation.start_end_time.upper|date:"l, F j Y, g A" }}
+                {% endtimezone %}
+              </div>
+              <div>
+                {{ rotation.weapons|join:", " }}
+              </div>
+              <dl>
+                <dt>Shifts worked</dt>
+                <dd>{{ rotation.num_shifts }}</dd>
+                <dt>Average waves cleared</dt>
+                <dd>{{ rotation.average_waves_cleared|floatformat }}</dd>
+                <dt>Average times rescued</dt>
+                <dd>{{ rotation.average_times_rescued|floatformat }}</dd>
+                <dt>Highest hazard level</dt>
+                <dd>{{ rotation.highest_hazard_level }}%</dd>
+                <dt>Highest Eggscutive VP grade points</dt>
+                <dd>{{ rotation.highest_grade_points|default:"0" }}</dd>
+              </dl>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </main>
+  </div>
+{% endblock %}

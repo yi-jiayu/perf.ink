@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("", views.shifts_index, name="shifts_index"),
+    path("rotations/", views.rotations_index, name="rotations_index"),
     path("shifts/<slug:shift_id>/", views.shifts_show, name="shifts_show"),
     path("statistics/", views.statistics_index, name="statistics_index"),
     path("accounts/profile/", views.profile, name="profile"),

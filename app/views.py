@@ -1,5 +1,6 @@
 import httpx
 from django.contrib.auth.decorators import login_required
+from django.db.models import Avg, Count, Q, Max
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -159,3 +160,28 @@ def statistics_index(request):
         "latest_rotation": statistics_latest_rotation,
     }
     return render(request, "app/statistics_index.html", context)
+
+
+@login_required
+def rotations_index(request):
+    rotations = (
+        models.SalmonRunRotation.objects.filter(
+            shifts__isnull=False,
+            shifts__uploaded_by=request.user,
+            shifts__players__is_uploader=True,
+        )
+        .annotate(
+            average_waves_cleared=Avg(
+                "shifts__waves_cleared", filter=~Q(shifts__waves_cleared=-1)
+            ),
+            num_shifts=Count("shifts"),
+            average_times_rescued=Avg("shifts__players__times_rescued"),
+            highest_hazard_level=Max("shifts__detail__hazard_level"),
+            highest_grade_points=Max("shifts__grade_points", filter=Q(shifts__grade='Eggsecutive VP')),
+        )
+        .order_by("-start_end_time")
+    )
+    context = {
+        "rotations": rotations,
+    }
+    return render(request, "app/rotations_index.html", context)
