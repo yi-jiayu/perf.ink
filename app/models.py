@@ -300,11 +300,11 @@ class SalmonRunShiftPlayer(models.Model):
         ]
 
     @staticmethod
-    def _from_raw(shift: SalmonRunShiftSummary, raw: dict) -> dict:
+    def _from_raw(shift: SalmonRunShiftSummary, raw: dict, is_uploader: bool) -> dict:
         return {
             "shift": shift,
             "splatnet_id": raw["player"]["id"],
-            "is_uploader": raw["player"]["isMyself"],
+            "is_uploader": is_uploader,
             "bosses_defeated": raw["defeatEnemyCount"],
             "golden_eggs_delivered": raw["goldenDeliverCount"],
             "golden_eggs_assisted": raw["goldenAssistCount"],
@@ -317,8 +317,8 @@ class SalmonRunShiftPlayer(models.Model):
         }
 
     @classmethod
-    def from_raw(cls, shift: SalmonRunShiftSummary, raw: dict):
-        return cls(**cls._from_raw(shift, raw))
+    def from_raw(cls, shift: SalmonRunShiftSummary, raw: dict, *, is_uploader: bool):
+        return cls(**cls._from_raw(shift, raw, is_uploader))
 
     def defeated_most_bosses(self):
         return all(

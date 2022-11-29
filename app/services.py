@@ -247,10 +247,12 @@ def update_shift_with_details(
 
     # load player results
     own_result = models.SalmonRunShiftPlayer.from_raw(
-        shift, details["data"]["coopHistoryDetail"]["myResult"]
+        shift,
+        details["data"]["coopHistoryDetail"]["myResult"],
+        is_uploader=True,
     )
     teammate_results = [
-        models.SalmonRunShiftPlayer.from_raw(shift, result)
+        models.SalmonRunShiftPlayer.from_raw(shift, result, is_uploader=False)
         for result in details["data"]["coopHistoryDetail"]["memberResults"]
     ]
     models.SalmonRunShiftPlayer.objects.bulk_create([own_result] + teammate_results)

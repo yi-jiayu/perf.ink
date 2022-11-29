@@ -120,7 +120,6 @@ def test_salmonrunshiftplayer_from_raw():
                 "id": "Q29vcFVuaWZvcm0tNA==",
             },
             "id": "Q29vcFBsYXllci11LXFvbWlmb3Z0bnBqdmNoZGd2bm1tOjIwMjIxMDAxVDA0MDIxMl82Y2U2NmQwYi1kY2U3LTRmNTEtYjBhMi02NDczN2M4YzYxOGQ6dS1xb21pZm92dG5wanZjaGRndm5tbQ==",
-            "isMyself": True,
             "species": "OCTOLING",
         },
         "weapons": [
@@ -136,7 +135,7 @@ def test_salmonrunshiftplayer_from_raw():
             "image": {
                 "url": "https://api.lp1.av5ja.srv.nintendo.net/resources/prod/special_img/blue/bd327d1b64372dedefd32adb28bea62a5b6152d93aada5d9fc4f669a1955d6d4_0.png?Expires=1673308800\u0026Signature=bSQSnCd92kGh99thLfoiCuUUzghDBY-j1UHVcHCgaV3umcufZUWCXq-Lj2Hn1z3na4ocHdZZGluqVA2Ql~wnSF0XfA-6NG5h8yJ95wUz8Oscc7EWU66e1sZhQslQFnvsjTcbsFzliwt5nQuCXk1f2fGUbZLuTVKSZ1ExtzLvWR-RbzrtW5TtY3Xzsci5lqHGF-fkFLKaOrY6CRax-PgSqW~BydRucyxY4paVjjlJja-k765qzMcr0M~jUO-~27x17f2AeL5vp1CRne1YilO9OsCMOIHMv798T5h8dgwgTrgQAWjU-W7qgNhvcwWq8recETIxUoJjs1gXIl8wAeX76Q__\u0026Key-Pair-Id=KNBS2THMRC385"
             },
-            "id": "U3BlY2lhbFdlYXBvbi0yMDAwNg==",
+            "weaponId": 20012,
         },
         "defeatEnemyCount": 0,
         "deliverCount": 140,
@@ -147,7 +146,7 @@ def test_salmonrunshiftplayer_from_raw():
     }
 
     shift = cast(models.SalmonRunShiftSummary, object())
-    got = models.SalmonRunShiftPlayer._from_raw(shift, raw)
+    got = models.SalmonRunShiftPlayer._from_raw(shift, raw, is_uploader=True)
     want = {
         "bosses_defeated": 0,
         "golden_eggs_assisted": 0,
