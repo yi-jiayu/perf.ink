@@ -5,6 +5,7 @@ from typing import Callable, Concatenate, Iterable, ParamSpec, TypeVar
 
 import httpx
 import pendulum
+import sentry_sdk
 import structlog
 from django.db import transaction
 from django.db.models import Avg, Count, Max, QuerySet
@@ -230,6 +231,8 @@ def update_shift_with_details(
     shift: models.SalmonRunShiftSummary,
     details: dict,
 ):
+    sentry_sdk.add_breadcrumb(data=details)
+
     if not details["data"]["coopHistoryDetail"]:
         # return if there is no coopHistoryDetail (e.g. when we try to fetch
         # details for a shift that is too old)
