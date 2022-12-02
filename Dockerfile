@@ -22,6 +22,9 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 COPY . /app/
 
+ARG VERSION="HEAD"
+RUN sed -i "s/__version__ = \"HEAD\"/__version__ = \"$VERSION\"/" perf_ink/__init__.py
+
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
 
