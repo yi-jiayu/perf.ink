@@ -61,13 +61,13 @@ def raw_salmon_run_shift_factory(shift_id_factory):
             "afterGradePoint": 160,
             "gradePointDiff": "DOWN",
             "bossResult": None,
-            "myResult": {"deliverCount": 140, "goldenDeliverCount": 5},
+            "myResult": {"deliverCount": 140},
             "memberResults": [
-                {"deliverCount": 322, "goldenDeliverCount": 6},
-                {"deliverCount": 409, "goldenDeliverCount": 8},
-                {"deliverCount": 328, "goldenDeliverCount": 3},
+                {"deliverCount": 322},
+                {"deliverCount": 409},
+                {"deliverCount": 328},
             ],
-            "waveResults": [{"waveNumber": 1}],
+            "waveResults": [{"teamDeliverCount": 22}],
         }
 
     return _raw_salmon_run_shift_factory

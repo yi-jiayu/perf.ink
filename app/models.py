@@ -224,9 +224,7 @@ class SalmonRunShiftSummary(models.Model):
         decoded_splatnet_id = base64.standard_b64decode(splatnet_id).decode("utf-8")
         played_at = pendulum.parse(decoded_splatnet_id[41:56])
 
-        golden_eggs_delivered_team = raw["myResult"]["goldenDeliverCount"] + sum(
-            teammate["goldenDeliverCount"] for teammate in raw["memberResults"]
-        )
+        golden_eggs_delivered_team = sum(wave["teamDeliverCount"] for wave in raw["waveResults"])
         power_eggs_delivered_team = raw["myResult"]["deliverCount"] + sum(
             teammate["deliverCount"] for teammate in raw["memberResults"]
         )
@@ -245,7 +243,7 @@ class SalmonRunShiftSummary(models.Model):
             grade_point_diff=raw["gradePointDiff"],
             golden_eggs_delivered_team=golden_eggs_delivered_team,
             power_eggs_delivered_team=power_eggs_delivered_team,
-            golden_eggs_delivered_self=raw["myResult"]["goldenDeliverCount"],
+            golden_eggs_delivered_self=-1,  # no longer available in summary
             power_eggs_delivered_self=raw["myResult"]["deliverCount"],
             king_salmonid=king_salmonid,
             king_salmonid_defeated=king_salmonid_defeated,

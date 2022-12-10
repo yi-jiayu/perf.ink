@@ -38,19 +38,29 @@ def test_salmonrunshiftsummary_from_raw():
         "previousHistoryDetail": {
             "id": "Q29vcEhpc3RvcnlEZXRhaWwtdS1xb21pZm92dG5wanZjaGRndm5tbToyMDIyMTAwMVQwMzUzMDBfODE4MGFhZmYtNmExNi00M2EzLTk4MmItMjYyNWIyMzNjMDdl"
         },
-        "resultWave": 1,
+        "resultWave": 0,
         "coopStage": {"name": "Gone Fission Hydroplant", "id": "Q29vcFN0YWdlLTc="},
         "afterGrade": {"name": "Eggsecutive VP", "id": "Q29vcEdyYWRlLTg="},
         "afterGradePoint": 160,
         "gradePointDiff": "DOWN",
         "bossResult": None,
-        "myResult": {"deliverCount": 140, "goldenDeliverCount": 5},
+        "myResult": {"deliverCount": 140},
         "memberResults": [
-            {"deliverCount": 322, "goldenDeliverCount": 6},
-            {"deliverCount": 409, "goldenDeliverCount": 8},
-            {"deliverCount": 328, "goldenDeliverCount": 3},
+            {"deliverCount": 322},
+            {"deliverCount": 409},
+            {"deliverCount": 328},
         ],
-        "waveResults": [{"waveNumber": 1}],
+        "waveResults": [
+            {
+                "teamDeliverCount": 33
+            },
+            {
+                "teamDeliverCount": 40
+            },
+            {
+                "teamDeliverCount": 26
+            }
+        ],
     }
 
     user = factories.UserFactory.build()
@@ -62,13 +72,13 @@ def test_salmonrunshiftsummary_from_raw():
         uploaded_by=user,
         played_at=datetime(2022, 10, 1, 4, 2, 12, tzinfo=timezone.utc),
         splatnet_id="Q29vcEhpc3RvcnlEZXRhaWwtdS1xb21pZm92dG5wanZjaGRndm5tbToyMDIyMTAwMVQwNDAyMTJfNmNlNjZkMGItZGNlNy00ZjUxLWIwYTItNjQ3MzdjOGM2MThk",
-        waves_cleared=0,
+        waves_cleared=3,
         grade="Eggsecutive VP",
         grade_points=160,
         grade_point_diff="DOWN",
-        golden_eggs_delivered_team=5 + 6 + 8 + 3,
+        golden_eggs_delivered_team=33 + 40 + 26,
         power_eggs_delivered_team=140 + 322 + 409 + 328,
-        golden_eggs_delivered_self=5,
+        golden_eggs_delivered_self=-1,
         power_eggs_delivered_self=140,
         king_salmonid="",
         king_salmonid_defeated=False,
