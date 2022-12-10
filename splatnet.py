@@ -12,7 +12,7 @@ import typer
 logger = structlog.get_logger()
 
 nsoapp_version = "2.4.0"
-splatnet3_version = "2.0.0-1b57b7ac"
+splatnet3_version = "2.0.0-bd36a652"
 app_user_agent = "woomy_bot/2.0.0"
 browser_user_agent = (
     "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
@@ -20,8 +20,8 @@ browser_user_agent = (
 
 
 class SplatnetQuery(Enum):
-    COOP_RESULT = "6ed02537e4a65bbb5e7f4f23092f6154"
-    COOP_HISTORY_DETAIL = "3cc5f826a6646b85f3ae45db51bd0707"
+    COOP_RESULT = "2fd21f270d381ecf894eb975c5f6a716"
+    COOP_HISTORY_DETAIL = "9ade2aa3656324870ccec023636aed32"
     SCHEDULE = "730cd98e84f1030d3e9ac86b6f1aae13"
 
 

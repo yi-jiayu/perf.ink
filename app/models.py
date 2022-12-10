@@ -273,7 +273,7 @@ class SalmonRunShiftDetail(models.Model):
     )
 
     hazard_level = models.FloatField()
-    smell_meter = models.IntegerField()
+    smell_meter = models.IntegerField(null=True, blank=True)
 
 
 class SalmonRunShiftPlayer(models.Model):
