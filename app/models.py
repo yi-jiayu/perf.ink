@@ -224,7 +224,7 @@ class SalmonRunShiftSummary(models.Model):
         decoded_splatnet_id = base64.standard_b64decode(splatnet_id).decode("utf-8")
         played_at = pendulum.parse(decoded_splatnet_id[41:56])
 
-        golden_eggs_delivered_team = sum(wave["teamDeliverCount"] for wave in raw["waveResults"])
+        golden_eggs_delivered_team = sum(wave["teamDeliverCount"] for wave in raw["waveResults"] if wave["teamDeliverCount"])
         power_eggs_delivered_team = raw["myResult"]["deliverCount"] + sum(
             teammate["deliverCount"] for teammate in raw["memberResults"]
         )

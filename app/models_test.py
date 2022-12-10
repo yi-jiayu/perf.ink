@@ -59,6 +59,9 @@ def test_salmonrunshiftsummary_from_raw():
             },
             {
                 "teamDeliverCount": 26
+            },
+            {
+                "teamDeliverCount": None
             }
         ],
     }
