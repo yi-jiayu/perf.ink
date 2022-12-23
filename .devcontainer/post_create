@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-poetry install --no-root
 source .venv/bin/activate
-cp template.env .env
 python manage.py migrate
+python manage.py seeddata

@@ -6,16 +6,26 @@
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	"features": {
-		"ghcr.io/devcontainers-contrib/features/poetry:1": {},
-		"ghcr.io/dhoeric/features/flyctl:1": {}
+		"ghcr.io/devcontainers-contrib/features/poetry:1": {}
+	},
+
+	"extensions": [
+		"ms-python.python"
+	],
+
+	"settings": {
+		"python.defaultInterpreterPath": ".venv/bin/python",
+		"python.formatting.blackPath": ".venv/bin/black",
+		"python.linting.pylintPath": ".venv/bin/pylint",
+		"python.formatting.provider": "black"
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or the host.
 	// "forwardPorts": [5000, 5432],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": ".devcontainer/post_create"
+	"onCreateCommand": [".devcontainer/on_create"],
+	"postCreateCommand": [".devcontainer/post_create"]
 
 	// Configure tool-specific properties.
 	// "customizations": {},
