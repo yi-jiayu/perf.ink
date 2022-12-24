@@ -51,18 +51,10 @@ def test_salmonrunshiftsummary_from_raw():
             {"deliverCount": 328},
         ],
         "waveResults": [
-            {
-                "teamDeliverCount": 33
-            },
-            {
-                "teamDeliverCount": 40
-            },
-            {
-                "teamDeliverCount": 26
-            },
-            {
-                "teamDeliverCount": None
-            }
+            {"teamDeliverCount": 33},
+            {"teamDeliverCount": 40},
+            {"teamDeliverCount": 26},
+            {"teamDeliverCount": None},
         ],
     }
 

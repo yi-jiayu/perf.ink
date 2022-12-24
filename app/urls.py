@@ -7,6 +7,7 @@ urlpatterns = [
     path("rotations/", views.rotations_index, name="rotations_index"),
     path("shifts/<slug:shift_id>/", views.shifts_show, name="shifts_show"),
     path("statistics/", views.statistics_index, name="statistics_index"),
+    path("rotations/<int:rotation_id>", views.rotations_detail, name="rotations_detail"),
     path("accounts/profile/", views.profile, name="profile"),
     path("accounts/nintendo_session/", views.nintendo_session, name="nintendo_session"),
     path("salmon_run/sync/", views.salmon_run_sync, name="salmon_run_sync"),

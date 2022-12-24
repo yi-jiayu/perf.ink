@@ -131,7 +131,11 @@ def sync_salmon_run_shift_summaries(
             )
             raw_summaries.append(raw_summary)
 
-            summary = models.SalmonRunShiftSummary.from_raw(user, rotation, shift)
+            try:
+                summary = models.SalmonRunShiftSummary.from_raw(user, rotation, shift)
+            except Exception as e:
+                breakpoint()
+                raise
             summaries.append(summary)
 
     models.SalmonRunShiftSummaryRaw.objects.bulk_create(
@@ -153,7 +157,7 @@ class SalmonRunShiftStatistics:
     shifts_worked: int
     average_waves_cleared: float
     most_golden_eggs_delivered_team: int
-    most_golden_eggs_delivered_self: int
+    highest_hazard_level_cleared: float
     waves_cleared_by_water_level: dict[str, tuple[int, int, float]]
     waves_cleared_by_event: dict[str, tuple[int, int, float]]
 
@@ -167,9 +171,9 @@ def salmon_run_shift_statistics(
     most_golden_eggs_delivered_team = shifts.aggregate(
         Max("golden_eggs_delivered_team")
     )["golden_eggs_delivered_team__max"]
-    most_golden_eggs_delivered_self = shifts.aggregate(
-        Max("golden_eggs_delivered_self")
-    )["golden_eggs_delivered_self__max"]
+    highest_hazard_level_cleared = shifts.filter(waves_cleared=3).aggregate(
+        Max("detail__hazard_level")
+    )["detail__hazard_level__max"]
     waves_cleared_by_water_level_denominator = dict(
         waves.values("water_level")
         .annotate(Count("water_level"))
@@ -220,7 +224,7 @@ def salmon_run_shift_statistics(
         shifts_worked=shifts_worked,
         average_waves_cleared=average_waves_cleared,
         most_golden_eggs_delivered_team=most_golden_eggs_delivered_team,
-        most_golden_eggs_delivered_self=most_golden_eggs_delivered_self,
+        highest_hazard_level_cleared=highest_hazard_level_cleared,
         waves_cleared_by_water_level=waves_cleared_by_water_level,
         waves_cleared_by_event=waves_cleared_by_event,
     )

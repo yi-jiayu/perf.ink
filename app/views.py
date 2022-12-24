@@ -1,6 +1,6 @@
 import httpx
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, Count, Q, Max
+from django.db.models import Avg, Count, Max, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -144,20 +144,8 @@ def statistics_index(request):
         shifts_all_time, waves_all_time
     )
 
-    latest_rotation = models.SalmonRunShiftSummary.objects.latest("played_at").rotation
-    shifts_latest_rotation = models.SalmonRunShiftSummary.objects.filter(
-        uploaded_by=request.user, rotation=latest_rotation
-    )
-    waves_latest_rotation = models.SalmonRunWave.objects.filter(
-        shift__rotation=latest_rotation
-    )
-    statistics_latest_rotation = services.salmon_run_shift_statistics(
-        shifts_latest_rotation, waves_latest_rotation
-    )
-
     context = {
         "all_time": statistics_all_time,
-        "latest_rotation": statistics_latest_rotation,
     }
     return render(request, "app/statistics_index.html", context)
 
@@ -177,7 +165,9 @@ def rotations_index(request):
             num_shifts=Count("shifts"),
             average_times_rescued=Avg("shifts__players__times_rescued"),
             highest_hazard_level=Max("shifts__detail__hazard_level"),
-            highest_grade_points=Max("shifts__grade_points", filter=Q(shifts__grade='Eggsecutive VP')),
+            highest_grade_points=Max(
+                "shifts__grade_points", filter=Q(shifts__grade="Eggsecutive VP")
+            ),
         )
         .order_by("-start_end_time")
     )
@@ -185,3 +175,18 @@ def rotations_index(request):
         "rotations": rotations,
     }
     return render(request, "app/rotations_index.html", context)
+
+
+@login_required
+def rotations_detail(request, rotation_id: int):
+    rotation = get_object_or_404(models.SalmonRunRotation, id=rotation_id)
+    shifts = models.SalmonRunShiftSummary.objects.filter(
+        rotation=rotation, uploaded_by=request.user
+    )
+    waves = models.SalmonRunWave.objects.filter(shift__rotation=rotation)
+    statistics = services.salmon_run_shift_statistics(shifts, waves)
+    context = {
+        "rotation": rotation,
+        "statistics": statistics,
+    }
+    return render(request, "app/rotations_detail.html", context)
