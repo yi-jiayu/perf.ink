@@ -9,9 +9,7 @@
     {{ nintendo_session_form }}
     <input type="submit" value="Save">
   </form>
-  {% if not nintendo_session_form.initial.token %}
-    <a href="{% url "new_nintendo_session" %}">Get Nintendo token</a>
-  {% endif %}
+  <a href="{% url "new_nintendo_session" %}">Get new Nintendo token</a>
 </div>
 
 <div>
