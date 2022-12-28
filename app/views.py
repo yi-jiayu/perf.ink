@@ -9,10 +9,10 @@ import splatnet
 from . import forms, models, services, tasks
 
 
-@login_required
-def shifts_index(request):
+def shifts_index(request, username: str):
+    user = get_object_or_404(models.User, username=username)
     summaries = list(
-        models.SalmonRunShiftSummary.objects.filter(uploaded_by=request.user)
+        models.SalmonRunShiftSummary.objects.filter(uploaded_by=user)
         .select_related("detail")
         .prefetch_related("players")
         .order_by("-played_at")[:50]
@@ -29,6 +29,7 @@ def shifts_index(request):
         default=0,
     )
     context = {
+        "user": user,
         "summaries": summaries,
         "highest_grade_points": highest_grade_points,
         "highest_hazard_level": highest_hazard_level,
@@ -36,22 +37,23 @@ def shifts_index(request):
     return render(request, "app/shifts_index.html", context)
 
 
-@login_required
-def shifts_show(request, shift_id: str):
+def shifts_show(request, username: str, shift_id: str):
+    user = get_object_or_404(models.User, username=username)
     try:
         detail = models.SalmonRunShiftDetailRaw.objects.get(
-            shift_id=shift_id, uploaded_by=request.user
+            shift_id=shift_id, uploaded_by=user
         )
         loading = False
     except models.SalmonRunShiftDetailRaw.DoesNotExist:
         detail = None
         loading = models.SalmonRunShiftSummaryRaw.objects.filter(
-            shift_id=shift_id, uploaded_by=request.user
+            shift_id=shift_id, uploaded_by=user
         ).exists()
 
     if detail is None and not loading:
         raise Http404()
     context = {
+        "user": user,
         "detail": detail,
         "loading": loading,
     }
@@ -128,16 +130,22 @@ def salmon_run_sync(request):
     return redirect("shifts_index")
 
 
-@login_required
-def salmon_run_shift_detail(request, shift_id: str):
-    detail = get_object_or_404(models.SalmonRunShiftDetailRaw, shift_id=shift_id)
-    return render(request, "app/salmon_run_shift_detail.html", {"detail": detail})
+def salmon_run_shift_detail(request, username: str, shift_id: str):
+    user = get_object_or_404(models.User, username=username)
+    detail = get_object_or_404(
+        models.SalmonRunShiftDetailRaw, shift_id=shift_id, uploaded_by=user
+    )
+    context = {
+        "user": user,
+        "detail": detail,
+    }
+    return render(request, "app/salmon_run_shift_detail.html", context)
 
 
-@login_required
-def statistics_index(request):
+def statistics_index(request, username: str):
+    user = get_object_or_404(models.User, username=username)
     shifts_all_time = models.SalmonRunShiftSummary.objects.filter(
-        uploaded_by=request.user
+        uploaded_by=user,
     )
     waves_all_time = models.SalmonRunWave.objects.all()
     statistics_all_time = services.salmon_run_shift_statistics(
@@ -145,17 +153,18 @@ def statistics_index(request):
     )
 
     context = {
+        "user": user,
         "all_time": statistics_all_time,
     }
     return render(request, "app/statistics_index.html", context)
 
 
-@login_required
-def rotations_index(request):
+def rotations_index(request, username: str):
+    user = get_object_or_404(models.User, username=username)
     rotations = (
         models.SalmonRunRotation.objects.filter(
             shifts__isnull=False,
-            shifts__uploaded_by=request.user,
+            shifts__uploaded_by=user,
             shifts__players__is_uploader=True,
         )
         .annotate(
@@ -172,20 +181,22 @@ def rotations_index(request):
         .order_by("-start_end_time")
     )
     context = {
+        "user": user,
         "rotations": rotations,
     }
     return render(request, "app/rotations_index.html", context)
 
 
-@login_required
-def rotations_detail(request, rotation_id: int):
+def rotations_detail(request, username: str, rotation_id: int):
+    user = get_object_or_404(models.User, username=username)
     rotation = get_object_or_404(models.SalmonRunRotation, id=rotation_id)
     shifts = models.SalmonRunShiftSummary.objects.filter(
-        rotation=rotation, uploaded_by=request.user
+        rotation=rotation, uploaded_by=user
     )
     waves = models.SalmonRunWave.objects.filter(shift__rotation=rotation)
     statistics = services.salmon_run_shift_statistics(shifts, waves)
     context = {
+        "user": user,
         "rotation": rotation,
         "statistics": statistics,
     }
