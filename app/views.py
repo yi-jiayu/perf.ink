@@ -1,6 +1,6 @@
 import httpx
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, Count, Max, Q
+from django.db.models import Avg, Count, FilteredRelation, Max, Q, Sum
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -9,9 +9,47 @@ import splatnet
 from . import forms, models, services, tasks
 
 
-@login_required
 def home(request):
-    return redirect("shifts_index", username=request.user.username)
+    players_by_tenure = (
+        models.User.objects.annotate(
+            player_results=FilteredRelation(
+                "salmonrunshiftsummary__players",
+                condition=Q(salmonrunshiftsummary__players__is_uploader=True),
+            )
+        )
+        .annotate(
+            shifts_worked=Count("salmonrunshiftsummary"),
+            bosses_defeated=Sum("player_results__bosses_defeated"),
+            golden_eggs=Sum("salmonrunshiftsummary__golden_eggs_delivered_self"),
+            power_eggs=Sum("salmonrunshiftsummary__power_eggs_delivered_self"),
+            king_salmonids=Count(
+                "salmonrunshiftsummary",
+                filter=Q(salmonrunshiftsummary__king_salmonid_defeated=True),
+            ),
+        )
+        .order_by("-shifts_worked")
+    )
+    players_by_performance = (
+        models.User.objects.annotate(
+            player_results=FilteredRelation(
+                "salmonrunshiftsummary__players",
+                condition=Q(salmonrunshiftsummary__players__is_uploader=True),
+            )
+        )
+        .annotate(
+            waves_cleared=Avg("salmonrunshiftsummary__waves_cleared"),
+            bosses_defeated=Avg("player_results__bosses_defeated"),
+            times_rescued=Avg("player_results__times_rescued"),
+            golden_eggs=Avg("salmonrunshiftsummary__golden_eggs_delivered_self"),
+            power_eggs=Avg("salmonrunshiftsummary__power_eggs_delivered_self"),
+        )
+        .order_by("-waves_cleared")
+    )
+    context = {
+        "players_by_tenure": players_by_tenure,
+        "players_by_performance": players_by_performance,
+    }
+    return render(request, "app/home.html", context)
 
 
 def shifts_index(request, username: str):

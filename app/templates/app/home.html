@@ -1,0 +1,80 @@
+{% extends "app/base.html" %}
+
+{% block content %}
+  <div class="pb-4 grid gap-y-4">
+    <header>
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold leading-tight tracking-tight text-gray-800">Salmon Run Performance Review</h1>
+      </div>
+    </header>
+    <main>
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section>
+          <h2>Leaderboard</h2>
+          <div>
+
+            <div>
+              <h3>Tenure</h3>
+              <table>
+                <thead>
+                <tr>
+                  <th class="text-left">Name</th>
+                  <th class="text-right">Shifts worked</th>
+                  <th class="text-right">Bosses defeated</th>
+                  <th class="text-right">Golden eggs delivered</th>
+                  <th class="text-right">Power eggs delivered</th>
+                  <th class="text-right">King Salmonids defeated</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for player in players_by_tenure %}
+                  <tr>
+                    <td class="text-left"><a href="{% url "shifts_index" player.username %}"
+                                             class="underline">{{ player.username }}</a></td>
+                    <td class="text-right">{{ player.shifts_worked }}</td>
+                    <td class="text-right">{{ player.bosses_defeated }}</td>
+                    <td class="text-right">{{ player.golden_eggs }}</td>
+                    <td class="text-right">{{ player.power_eggs }}</td>
+                    <td class="text-right">{{ player.king_salmonids }}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <h3>Performance</h3>
+              <table>
+                <thead>
+                <tr>
+                  <th class="text-left">Name</th>
+                  <th class="text-right">Average waves cleared</th>
+                  <th class="text-right">Average times rescued</th>
+                  <th class="text-right">Average bosses defeated</th>
+                  <th class="text-right">Average golden eggs delivered</th>
+                  <th class="text-right">Average power eggs delivered</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for player in players_by_performance %}
+                  <tr>
+                    <td class="text-left"><a href="{% url "shifts_index" player.username %}"
+                                             class="underline">{{ player.username }}</a></td>
+                    <td class="text-right">{{ player.waves_cleared|floatformat:1 }}</td>
+                    <td class="text-right">{{ player.times_rescued|floatformat:1 }}</td>
+                    <td class="text-right">{{ player.bosses_defeated|floatformat:1 }}</td>
+                    <td class="text-right">{{ player.golden_eggs|floatformat:1 }}</td>
+                    <td class="text-right">{{ player.power_eggs|floatformat:1 }}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+        <section>
+          <h2>Recent shifts</h2>
+        </section>
+      </div>
+    </main>
+  </div>
+{% endblock %}
