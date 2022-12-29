@@ -16,6 +16,7 @@ import dj_database_url
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
+from . import __version__
 from .config import config
 
 sentry_sdk.init(
@@ -30,6 +31,7 @@ sentry_sdk.init(
     # If you wish to associate users to errors (assuming you are using
     # django.contrib.auth) you may enable sending PII data.
     send_default_pii=True,
+    release=f"perf-ink@{__version__}"
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
