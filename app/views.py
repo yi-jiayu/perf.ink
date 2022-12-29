@@ -9,6 +9,11 @@ import splatnet
 from . import forms, models, services, tasks
 
 
+@login_required
+def home(request):
+    return redirect("shifts_index", username=request.user.username)
+
+
 def shifts_index(request, username: str):
     user = get_object_or_404(models.User, username=username)
     summaries = list(
