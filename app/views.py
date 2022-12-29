@@ -132,7 +132,7 @@ def salmon_run_sync(request):
         tasks.sync_salmon_run_shift_details.delay(
             request.user.id, [summary.splatnet_id for summary in summaries]
         )
-    return redirect("shifts_index")
+    return redirect("shifts_index", username=request.user.username)
 
 
 def salmon_run_shift_detail(request, username: str, shift_id: str):
