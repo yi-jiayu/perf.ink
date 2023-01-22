@@ -236,7 +236,9 @@ def rotations_detail(request, username: str, rotation_id: int):
     shifts = models.SalmonRunShiftSummary.objects.filter(
         rotation=rotation, uploaded_by=user
     )
-    waves = models.SalmonRunWave.objects.filter(shift__rotation=rotation)
+    waves = models.SalmonRunWave.objects.filter(
+        shift__rotation=rotation, shift__uploaded_by=user
+    )
     statistics = services.salmon_run_shift_statistics(shifts, waves)
     context = {
         "user": user,
