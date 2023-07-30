@@ -20,8 +20,8 @@ browser_user_agent = (
 
 
 class SplatnetQuery(Enum):
-    COOP_RESULT = "2fd21f270d381ecf894eb975c5f6a716"
-    COOP_HISTORY_DETAIL = "9ade2aa3656324870ccec023636aed32"
+    COOP_RESULT = "01fb9793ad92f91892ea713410173260"
+    COOP_HISTORY_DETAIL = "379f0d9b78b531be53044bcac031b34b"
     SCHEDULE = "730cd98e84f1030d3e9ac86b6f1aae13"
 
 
