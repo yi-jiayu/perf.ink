@@ -104,7 +104,6 @@ def get_played_at_from_shift_id(shift_id: str) -> datetime:
     return pendulum.parse(decoded_shift_id[41:56])
 
 
-@transaction.atomic
 def sync_salmon_run_shift_summaries(
     user: models.User,
 ) -> list[models.SalmonRunShiftSummary]:
@@ -112,38 +111,35 @@ def sync_salmon_run_shift_summaries(
     raw_summaries = []
     summaries = []
     # reverse groups to get oldest first
-    for group in reversed(groups):
-        rotation, created = models.SalmonRunRotation.objects.get_or_create(
-            start_end_time=group.start_end_time,
-            stage=group.stage,
-            defaults={
-                "weapons": group.weapons,
-            },
-        )
-        # reverse shifts to get oldest first
-        for shift in reversed(group.shifts):
-            raw_summary = models.SalmonRunShiftSummaryRaw(
-                rotation=rotation,
-                shift_id=shift["id"],
-                uploaded_by=user,
-                data=shift,
-                played_at=get_played_at_from_shift_id(shift["id"]),
+    with transaction.atomic():
+        for group in reversed(groups):
+            rotation, created = models.SalmonRunRotation.objects.get_or_create(
+                start_end_time=group.start_end_time,
+                stage=group.stage,
+                defaults={
+                    "weapons": group.weapons,
+                },
             )
-            raw_summaries.append(raw_summary)
+            # reverse shifts to get oldest first
+            for shift in reversed(group.shifts):
+                raw_summary = models.SalmonRunShiftSummaryRaw(
+                    rotation=rotation,
+                    shift_id=shift["id"],
+                    uploaded_by=user,
+                    data=shift,
+                    played_at=get_played_at_from_shift_id(shift["id"]),
+                )
+                raw_summaries.append(raw_summary)
 
-            try:
                 summary = models.SalmonRunShiftSummary.from_raw(user, rotation, shift)
-            except Exception as e:
-                breakpoint()
-                raise
-            summaries.append(summary)
+                summaries.append(summary)
 
-    models.SalmonRunShiftSummaryRaw.objects.bulk_create(
-        raw_summaries, ignore_conflicts=True
-    )
-    return models.SalmonRunShiftSummary.objects.bulk_create(
-        summaries, ignore_conflicts=True
-    )
+        models.SalmonRunShiftSummaryRaw.objects.bulk_create(
+            raw_summaries, ignore_conflicts=True
+        )
+        return models.SalmonRunShiftSummary.objects.bulk_create(
+            summaries, ignore_conflicts=True
+        )
 
 
 @with_bullet_token
