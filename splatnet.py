@@ -20,9 +20,14 @@ browser_user_agent = (
 
 
 class SplatnetQuery(Enum):
-    COOP_RESULT = "01fb9793ad92f91892ea713410173260"
-    COOP_HISTORY_DETAIL = "379f0d9b78b531be53044bcac031b34b"
-    SCHEDULE = "730cd98e84f1030d3e9ac86b6f1aae13"
+    # CoopHistoryQuery
+    COOP_RESULT = "0f8c33970a425683bb1bdecca50a0ca4fb3c3641c0b2a1237aedfde9c0cb2b8f"
+    # CoopHistoryDetailQuery
+    COOP_HISTORY_DETAIL = (
+        "824a1e22c4ad4eece7ad94a9a0343ecd76784be4f77d8f6f563c165afc8cf602"
+    )
+    # StageScheduleQuery
+    SCHEDULE = "9b6b90568f990b2a14f04c25dd6eb53b35cc12ac815db85ececfccee64215edd"
 
 
 def _sha256(s: str):
